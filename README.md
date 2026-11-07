@@ -59,7 +59,9 @@ Output:
 
 ## Simulation (Wokwi)
 
-The firmware can run in the [Wokwi](https://wokwi.com) ESP32 simulator with both probes and the display (`diagram.json`, `wokwi.toml`). Wokwi cannot simulate the hotspot, so the simulation build joins the simulated network `Wokwi-GUEST` instead.
+The firmware can run in the [Wokwi](https://wokwi.com) ESP32 simulator with both probes and the display (`diagram.json`, `wokwi.toml`). This lets you test changes without any hardware: probe detection, the display, the BOOT button, the history and the web page. Wokwi cannot simulate the hotspot, so the simulation build joins the simulated network `Wokwi-GUEST` instead.
+
+![Wokwi simulation: ESP32 with the TM1637 display showing 4,5° and two DS18B20 probes](docs/wokwi-simulation.png)
 
 1. `pio run -e esp32-sim`
 2. VS Code with the “Wokwi Simulator” extension (free account at wokwi.com, then F1 → “Wokwi: Request a new License”), open the project, F1 → “Wokwi: Start Simulator”.

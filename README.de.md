@@ -57,7 +57,9 @@ Ergebnis:
 
 ## Simulation (Wokwi)
 
-Die Firmware läuft im ESP32-Simulator [Wokwi](https://wokwi.com) mit beiden Fühlern und der Anzeige (`diagram.json`, `wokwi.toml`). Den Hotspot kann Wokwi nicht simulieren, deshalb verbindet sich die Simulations-Variante stattdessen mit dem simulierten WLAN `Wokwi-GUEST`.
+Die Firmware läuft im ESP32-Simulator [Wokwi](https://wokwi.com) mit beiden Fühlern und der Anzeige (`diagram.json`, `wokwi.toml`). Damit lassen sich Änderungen ohne Hardware testen: Fühler-Erkennung, Anzeige, BOOT-Taste, Verlauf und Webseite. Den Hotspot kann Wokwi nicht simulieren, deshalb verbindet sich die Simulations-Variante stattdessen mit dem simulierten WLAN `Wokwi-GUEST`.
+
+![Wokwi-Simulation: ESP32 mit der TM1637-Anzeige (4,5°) und zwei DS18B20-Fühlern](docs/wokwi-simulation.png)
 
 1. `pio run -e esp32-sim`
 2. VS Code mit der Erweiterung „Wokwi Simulator“ (kostenloser Account auf wokwi.com, dann F1 → „Wokwi: Request a new License“), Projekt öffnen, F1 → „Wokwi: Start Simulator“.
