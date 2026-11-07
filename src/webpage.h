@@ -30,6 +30,9 @@ button.sec{background:transparent;color:var(--acc);border:1px solid var(--line)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media (max-width:520px){.row{grid-template-columns:1fr}}
 details summary{cursor:pointer;font-weight:600}
+label.chk{display:flex;gap:8px;align-items:flex-start;color:var(--fg);font-size:15px}
+label.chk input{width:auto;margin-top:3px}
+button.bad{color:var(--bad);border-color:var(--bad)}
 .msg{font-size:14px;margin-top:8px;min-height:1em}
 .bad{color:var(--bad)}
 table{border-collapse:collapse;width:100%;font-size:14px}
@@ -73,6 +76,14 @@ td{padding:3px 0;vertical-align:top}td:first-child{color:var(--mut);width:45%}
 <button class="sec" onclick="scan()">Netze suchen</button>
 <button class="sec" onclick="ssid.value='';pass.value='';saveWifi()">Heim-WLAN trennen</button>
 <div class="msg" id="wifimsg"></div>
+<h2 style="margin-top:18px">Hotspot</h2>
+<p class="mut" id="defpass"></p>
+<label class="chk"><input id="apauto" type="checkbox"> Hotspot nur zur Einrichtung: aus, solange das Heim-WLAN verbunden ist</label>
+<p class="mut">Er geht etwa 1 Minute nach dem Verbinden aus, sobald kein Handy mehr mit ihm verbunden ist. Fällt das Heim-WLAN länger als 2 Minuten aus, geht er von selbst wieder an.</p>
+<label for="appass">Neues Hotspot-Passwort (8–63 Zeichen, leer = unverändert)</label>
+<input id="appass" type="password" autocomplete="new-password">
+<button onclick="saveAp()">Hotspot speichern</button>
+<div class="msg" id="apmsg"></div>
 </details>
 </div>
 
@@ -84,6 +95,10 @@ td{padding:3px 0;vertical-align:top}td:first-child{color:var(--mut);width:45%}
 <input id="fw" type="file" accept=".bin">
 <button onclick="upload()">Firmware aktualisieren</button>
 <div class="msg" id="fwmsg"></div>
+<h2 style="margin-top:18px">Werkseinstellungen</h2>
+<p class="mut">Löscht Heim-WLAN, Hotspot-Passwort, Fühler-Namen und Helligkeit und startet neu. Danach gilt wieder: WLAN „Kuehlschrank“, Passwort „kuehlschrank“. Geht auch ohne Handy: BOOT-Taste 10 Sekunden halten.</p>
+<button class="sec bad" id="resetbtn" onclick="factoryReset()">Auf Werkseinstellungen zurücksetzen</button>
+<div class="msg" id="resetmsg"></div>
 </details>
 </div>
 </main>
@@ -123,11 +138,12 @@ function render(){
   }
   if(!formFilled){
     $('name0').value=state.sensors[0].name;$('name1').value=state.sensors[1].name;$('bright').value=state.bright;
-    $('ssid').value=state.sta.ssid;formFilled=true;
+    $('ssid').value=state.sta.ssid;$('apauto').checked=state.ap.auto;formFilled=true;
   }
   const st=state.sta;
+  $('defpass').innerHTML=state.ap.defpass?'<span class="bad">Der Hotspot nutzt noch das Standard-Passwort „kuehlschrank“. Bitte unten ein eigenes setzen.</span>':'';
   $('wifi').innerHTML=
-    `<tr><td>Hotspot</td><td>${esc(state.ap.ssid)} · http://${state.ap.ip}/ · ${state.ap.clients} Gerät(e)</td></tr>`+
+    `<tr><td>Hotspot</td><td>${esc(state.ap.ssid)} · ${state.ap.active?`an · http://${state.ap.ip}/ · ${state.ap.clients} Gerät(e)`:'aus (Heim-WLAN verbunden)'}</td></tr>`+
     `<tr><td>Heim-WLAN</td><td>${st.ssid?esc(st.ssid)+(st.connected?` · verbunden · http://${st.ip}/ · ${st.rssi} dBm`:' · <span class="bad">nicht verbunden</span>'):'nicht eingerichtet'}</td></tr>`;
   const up=state.up,d=Math.floor(up/86400),h=Math.floor(up%86400/3600),m=Math.floor(up%3600/60);
   $('info').innerHTML=
@@ -188,12 +204,28 @@ function saveSettings(){
     .then(()=>{$('setmsg').textContent='Gespeichert.';refreshAll()})
     .catch(()=>$('setmsg').textContent='Fehler beim Speichern.');
 }
+function saveAp(){
+  const pw=$('appass').value;
+  if(pw&&(pw.length<8||pw.length>63)){$('apmsg').textContent='Das Passwort muss 8 bis 63 Zeichen lang sein.';return}
+  const data={apauto:$('apauto').checked?'1':'0'};if(pw)data.appass=pw;
+  fetch('/api/settings',{method:'POST',body:new URLSearchParams(data)}).then(r=>r.json()).then(j=>{
+    if(!j.ok){$('apmsg').textContent=j.error||'Fehler beim Speichern.';return}
+    $('appass').value='';
+    $('apmsg').textContent=pw?'Gespeichert. Der Hotspot startet neu: Handy mit dem neuen Passwort wieder verbinden.':'Gespeichert.';
+    setTimeout(loadState,2000);
+  }).catch(()=>{$('apmsg').textContent=pw?'Gespeichert. Handy mit dem neuen Passwort wieder verbinden.':'Fehler beim Speichern.'});
+}
+function factoryReset(){
+  if(!confirm('Wirklich alles auf Werkseinstellungen zurücksetzen?'))return;
+  post('/api/reset').catch(()=>{});
+  $('resetmsg').textContent='Wird zurückgesetzt. Danach mit WLAN „Kuehlschrank“ (Passwort „kuehlschrank“) verbinden.';
+}
 function forget(i){
   if(!confirm('Fühler '+(i+1)+' entfernen? Der Verlauf dieses Fühlers wird gelöscht.'))return;
   post('/api/forget',{slot:i}).then(refreshAll);
 }
 function saveWifi(){
-  $('wifimsg').textContent='Gespeichert, verbinde …';
+  $('wifimsg').textContent=$('ssid').value?'Gespeichert, verbinde … Die Anzeige zeigt danach die neue Adresse (IP). Erreichbar auch unter http://kuehlschrank.local/':'Heim-WLAN getrennt.';
   post('/api/wifi',{ssid:$('ssid').value,pass:$('pass').value}).then(()=>setTimeout(loadState,8000));
 }
 function scan(){

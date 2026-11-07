@@ -369,7 +369,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <!-- ============================================================ STEP 5 -->
 <section class="step" id="s5">
   <div class="stephead"><div class="num">5</div><div><h2>Firmware aufspielen</h2><p class="muted">Nur einmal nötig, am PC mit Chrome oder Edge. Spätere Updates gehen über das WLAN.</p></div></div>
-  <div class="note tip"><b class="lab">Datei</b><p>Du brauchst die Datei <code>kuehlschrank-full.bin</code> aus dem Projektordner <code>firmware/</code>. Lass sie dir schicken oder kopiere sie auf den PC.</p></div>
+  <div class="note tip"><b class="lab">Datei</b><p>Du brauchst die Datei <code>kuehlschrank-full.bin</code>. Lade sie aus dem <a href="https://github.com/samba09/fridgeMonitor/releases/latest" target="_blank" rel="noopener">GitHub-Release</a> herunter.</p></div>
   <ol class="do">
     <li>ESP32 mit dem USB-Kabel an den PC anschließen. Auf dem Board leuchtet eine rote LED.</li>
     <li>In Chrome oder Edge diese Seite öffnen:
@@ -413,6 +413,8 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <li>Einen Fühler in der Hand halten. Nach ein paar Sekunden steigt sein Wert Richtung 30 °C. So weißt du, welcher welcher ist.</li>
   </ol>
   <div class="note tip"><b class="lab">Namen</b><p>Ein Fühler unter −5 °C heißt automatisch „Gefrierfach“, sonst „Kühlschrank“. Beim ersten Start auf dem Tisch heißen also beide „Kühlschrank“. Auf der Webseite unter <b>Einstellungen</b> kannst du sie umbenennen oder tauschen.</p></div>
+  <div class="note warn"><b class="lab">Eigenes Passwort setzen</b><p>Das Hotspot-Passwort „kuehlschrank“ steht öffentlich im Internet. Auf der Webseite unter <b>WLAN → Hotspot</b> ein eigenes Passwort eintragen (mindestens 8 Zeichen). Danach das Handy mit dem neuen Passwort wieder verbinden.</p></div>
+  <div class="note tip"><b class="lab">Heim-WLAN (optional)</b><p>Unter <b>WLAN</b> das Heim-WLAN auswählen und das Passwort eingeben. Die Anzeige zeigt dann <code>IP</code> und die neue Adresse, alternativ geht <code>http://kuehlschrank.local</code>. Nach etwa einer Minute schaltet sich der Hotspot ab, die Seite ist dann nur noch im Heim-WLAN erreichbar. Fällt das Heim-WLAN aus, ist der Hotspot nach 2 Minuten wieder da.</p></div>
   <label class="done"><input type="checkbox" id="c6" data-step> Seite geht auf dem Handy</label>
 </section>
 
@@ -560,7 +562,8 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <div><b>Nur ein Fühler erscheint</b><p>Ein Draht des zweiten Fühlers sitzt nicht richtig in der Klemme. Alle drei Klemmen nachziehen. Der ESP sucht alle 30 Sekunden neu.</p></div>
     <div><b>WLAN „Kuehlschrank“ fehlt</b><p>USB-Kabel und Ladegerät prüfen. Leuchtet die rote LED auf dem ESP? Kurz die Taste EN drücken.</p></div>
     <div><b>Seite öffnet sich nicht</b><p>Im Browser von Hand <code>192.168.4.1</code> eingeben. Mobile Daten am Handy kurz ausschalten, falls das Handy die Seite übers Mobilnetz sucht.</p></div>
-    <div><b>Adresse vergessen</b><p>Die Taste <b>BOOT</b> kurz drücken. Die Anzeige zeigt die Adresse noch einmal.</p></div>
+    <div><b>Adresse vergessen</b><p>Die Taste <b>BOOT</b> kurz drücken. Die Anzeige zeigt die Adresse noch einmal (<code>AP</code> = Hotspot, <code>IP</code> = Heim-WLAN).</p></div>
+    <div><b>Passwort vergessen oder alles neu</b><p><b>Werksreset:</b> Die Taste <b>BOOT</b> 10 Sekunden gedrückt halten. Die Anzeige zählt <code>rES7</code> bis <code>rES1</code> herunter, dann startet der ESP neu. Danach gilt wieder WLAN „Kuehlschrank“ mit Passwort „kuehlschrank“. Früher loslassen bricht ab.</p></div>
     <div><b>Verlauf ist leer</b><p>Nach einem Stromausfall beginnt der Verlauf neu. Er füllt sich mit einem Wert pro Minute.</p></div>
   </div>
 </section>

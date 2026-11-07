@@ -26,7 +26,7 @@
 #include "tm1637.h"
 #include "webpage.h"
 
-static const char *FW_VERSION = "1.0.0";
+static const char *FW_VERSION = "1.1.0";
 
 // ---------------------------------------------------------------- config
 constexpr uint8_t PIN_ONEWIRE = 4;
@@ -46,9 +46,13 @@ constexpr uint32_t SENSOR_STALE_MS = 30UL * 1000;
 constexpr uint32_t RESCAN_INTERVAL_MS = 30UL * 1000;
 constexpr uint32_t DISPLAY_FRAME_MS = 3000;
 constexpr uint32_t STA_RETRY_MS = 60UL * 1000;
+constexpr uint32_t AP_OFF_DELAY_MS = 60UL * 1000;        // home WiFi stable this long -> hotspot may go off
+constexpr uint32_t AP_FORCE_OFF_MS = 10UL * 60 * 1000;   // ... even if a phone is still connected
+constexpr uint32_t AP_FALLBACK_MS = 2UL * 60 * 1000;     // home WiFi gone this long -> hotspot back on
+constexpr uint32_t RESET_HOLD_MS = 10UL * 1000;          // hold BOOT this long for factory reset
 
 static const char *AP_SSID = "Kuehlschrank";
-static const char *AP_PASS = "kuehlschrank";  // min. 8 characters
+static const char *AP_PASS_DEFAULT = "kuehlschrank";  // min. 8 characters
 static const char *HOSTNAME = "kuehlschrank";
 static const char *TZ_INFO = "CET-1CEST,M3.5.0,M10.5.0/3";
 
@@ -79,8 +83,13 @@ uint32_t lastSampleMs = 0;
 
 uint8_t brightness = 4;
 String staSsid, staPass;
+String apPass;
+bool apAuto = true;      // hotspot only for setup: off while the home WiFi works
+bool apActive = false;
 bool staWasConnected = false;
 uint32_t staLastTryMs = 0;
+uint32_t staChangeMs = 0;  // last change of the home WiFi connection state
+bool buttonOverride = false;  // display is showing the factory reset countdown
 
 bool conversionPending = false;
 uint32_t conversionStartMs = 0;
@@ -145,6 +154,9 @@ void loadSettings() {
   brightness = prefs.getUChar("bright", 4);
   staSsid = prefs.getString("ssid", "");
   staPass = prefs.getString("pass", "");
+  apPass = prefs.getString("appass", AP_PASS_DEFAULT);
+  if (apPass.length() < 8) apPass = AP_PASS_DEFAULT;
+  apAuto = prefs.getBool("apauto", true);
   for (int i = 0; i < NSLOTS; i++) {
     char key[4];
     snprintf(key, sizeof(key), "c%d", i);
@@ -346,6 +358,7 @@ void startIpDisplay() {
 }
 
 void handleDisplay() {
+  if (buttonOverride) return;
   uint32_t now = millis();
   if (ipFrameCount > 0) {
     if (now - frameStartMs < 1500) return;
@@ -378,13 +391,45 @@ void handleDisplay() {
 }
 
 // ---------------------------------------------------------------- BOOT button
+void factoryReset() {
+  Serial.println("Werksreset");
+  prefs.clear();
+  const uint8_t dashes[4] = {seg::MINUS, seg::MINUS, seg::MINUS, seg::MINUS};
+  display.show(dashes);
+  delay(500);
+  ESP.restart();
+}
+
+// Short press: show IP address. Hold 10 s: factory reset (countdown "rES7" ... "rES1").
 void handleButton() {
   static bool wasDown = false;
   static uint32_t downSince = 0;
+  static int lastLeft = -1;
   bool down = digitalRead(PIN_BOOT) == LOW;
   uint32_t now = millis();
-  if (down && !wasDown) downSince = now;
-  if (!down && wasDown && now - downSince > 50) startIpDisplay();
+  if (down && !wasDown) {
+    downSince = now;
+    lastLeft = -1;
+  }
+  if (down && now - downSince > 3000) {
+    int left = (int)((RESET_HOLD_MS - (now - downSince) + 999) / 1000);
+    if (now - downSince >= RESET_HOLD_MS) factoryReset();
+    if (left != lastLeft) {
+      lastLeft = left;
+      buttonOverride = true;
+      const uint8_t segs[4] = {seg::R, seg::E, seg::S, seg::DIGITS[left % 10]};
+      display.show(segs);
+    }
+  }
+  if (!down && wasDown) {
+    uint32_t held = now - downSince;
+    if (buttonOverride) {
+      buttonOverride = false;  // released early: no reset
+      frameStartMs = 0;
+    } else if (held > 50 && held < 3000) {
+      startIpDisplay();
+    }
+  }
   wasDown = down;
 }
 
@@ -396,14 +441,48 @@ void startSta() {
   staLastTryMs = millis();
 }
 
+void apStart() {
+  if (apActive) return;
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP(AP_SSID, apPass.c_str());
+  dns.start(53, "*", WiFi.softAPIP());
+  apActive = true;
+  Serial.printf("Hotspot \"%s\" an, Seite: http://%s/\n", AP_SSID, WiFi.softAPIP().toString().c_str());
+}
+
+void apStop() {
+  if (!apActive) return;
+  dns.stop();
+  WiFi.softAPdisconnect(true);  // keeps the home WiFi connection
+  apActive = false;
+  Serial.println("Hotspot aus (Heim-WLAN verbunden)");
+}
+
 void handleWifi() {
+  uint32_t now = millis();
   bool connected = WiFi.status() == WL_CONNECTED;
+  if (connected != staWasConnected) staChangeMs = now;
   if (connected && !staWasConnected) {
     Serial.printf("WLAN verbunden, IP %s\n", WiFi.localIP().toString().c_str());
     configTzTime(TZ_INFO, "pool.ntp.org", "time.google.com");
     startIpDisplay();
   }
   staWasConnected = connected;
+
+  // Hotspot: always on, or only for setup / as fallback when the home WiFi is down.
+  bool want;
+  if (!apAuto || staSsid.length() == 0) {
+    want = true;
+  } else if (connected) {
+    uint32_t up = now - staChangeMs;
+    bool phoneOnHotspot = apActive && WiFi.softAPgetStationNum() > 0;
+    want = apActive && (up < AP_OFF_DELAY_MS || (phoneOnHotspot && up < AP_FORCE_OFF_MS));
+  } else {
+    want = apActive || now - staChangeMs > AP_FALLBACK_MS;
+  }
+  if (want && !apActive) apStart();
+  if (!want && apActive) apStop();
+
   // Retry rarely: while the station searches for its network the hotspot is less stable.
   if (!connected && staSsid.length() > 0 && millis() - staLastTryMs > STA_RETRY_MS) {
     WiFi.disconnect(false, false);
@@ -434,7 +513,13 @@ void handleState() {
   j += "\",\"ip\":\"";
   j += WiFi.softAPIP().toString();
   j += "\",\"clients\":";
-  j += WiFi.softAPgetStationNum();
+  j += apActive ? WiFi.softAPgetStationNum() : 0;
+  j += ",\"active\":";
+  j += apActive ? "true" : "false";
+  j += ",\"auto\":";
+  j += apAuto ? "true" : "false";
+  j += ",\"defpass\":";
+  j += apPass == AP_PASS_DEFAULT ? "true" : "false";
   j += "},\"sta\":{\"ssid\":\"";
   j += jsonEscape(staSsid);
   j += "\",\"connected\":";
@@ -514,7 +599,33 @@ void handleSettings() {
     prefs.putUChar("bright", brightness);
     frameStartMs = 0;  // apply now
   }
+  if (server.hasArg("apauto")) {
+    apAuto = server.arg("apauto") == "1";
+    prefs.putBool("apauto", apAuto);
+  }
+  bool newPass = false;
+  if (server.hasArg("appass") && server.arg("appass").length() > 0) {
+    String p = server.arg("appass");
+    if (p.length() < 8 || p.length() > 63) {
+      sendJson("{\"ok\":false,\"error\":\"Das Hotspot-Passwort muss 8 bis 63 Zeichen lang sein.\"}", 400);
+      return;
+    }
+    newPass = p != apPass;
+    apPass = p;
+    prefs.putString("appass", apPass);
+  }
   sendJson("{\"ok\":true}");
+  if (newPass && apActive) {  // restart hotspot with the new password
+    delay(300);
+    apStop();
+    apStart();
+  }
+}
+
+void handleFactoryReset() {
+  sendJson("{\"ok\":true}");
+  delay(300);
+  factoryReset();
 }
 
 void handleSwap() {
@@ -625,8 +736,12 @@ void handleRoot() {
 
 void handleNotFound() {
   // Captive portal: send phones that just joined the hotspot to the start page.
-  server.sendHeader("Location", String("http://") + WiFi.softAPIP().toString() + "/", true);
-  server.send(302, "text/plain", "");
+  if (apActive && server.client().localIP() == WiFi.softAPIP()) {
+    server.sendHeader("Location", String("http://") + WiFi.softAPIP().toString() + "/", true);
+    server.send(302, "text/plain", "");
+    return;
+  }
+  server.send(404, "text/plain", "Nicht gefunden");
 }
 
 void setupWeb() {
@@ -639,6 +754,7 @@ void setupWeb() {
   server.on("/api/wifi", HTTP_POST, handleWifiSave);
   server.on("/api/scan", HTTP_GET, handleWifiScan);
   server.on("/api/time", HTTP_POST, handleSetTime);
+  server.on("/api/reset", HTTP_POST, handleFactoryReset);
   server.on("/update", HTTP_POST, handleUpdateDone, handleUpdateUpload);
   server.onNotFound(handleNotFound);
   server.begin();
@@ -674,15 +790,12 @@ void setup() {
   WiFi.setHostname(HOSTNAME);
   WiFi.mode(WIFI_AP_STA);
   WiFi.setAutoReconnect(false);  // retries are handled in handleWifi()
-  WiFi.softAP(AP_SSID, AP_PASS);
-  dns.start(53, "*", WiFi.softAPIP());
+  apStart();  // on at boot; handleWifi() switches it off later if configured
   startSta();
   MDNS.begin(HOSTNAME);
   MDNS.addService("http", "tcp", 80);
   setupWeb();
 
-  Serial.printf("Hotspot \"%s\" (Passwort \"%s\"), Seite: http://%s/\n", AP_SSID, AP_PASS,
-                WiFi.softAPIP().toString().c_str());
   startIpDisplay();
 }
 
