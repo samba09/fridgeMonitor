@@ -3,7 +3,7 @@
 *[Deutsche Version](README.de.md)*
 
 ESP32 with two DS18B20 temperature probes and a 4-digit 7-segment display (TM1637). No soldering required.
-Parts and wiring: [partlist.md](partlist.md) (German). Illustrated build guide: [guide.html](guide.html) (English), [anleitung.html](anleitung.html) (German).
+Parts and wiring: [partlist.md](partlist.md) (German). **Illustrated build guide:** [English](https://samba09.github.io/fridgeMonitor/guide.html) · [Deutsch](https://samba09.github.io/fridgeMonitor/anleitung.html) (opens in the browser, no account needed).
 
 ## What the firmware does
 

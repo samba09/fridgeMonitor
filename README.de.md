@@ -3,7 +3,7 @@
 *[English version](README.md)*
 
 ESP32 mit zwei DS18B20-Fühlern und einer 4-stelligen 7-Segment-Anzeige (TM1637).
-Teile und Verkabelung: [partlist.md](partlist.md). Bebilderte Bauanleitung: [anleitung.html](anleitung.html).
+Teile und Verkabelung: [partlist.md](partlist.md). **Bebilderte Bauanleitung:** [Deutsch](https://samba09.github.io/fridgeMonitor/anleitung.html) · [English](https://samba09.github.io/fridgeMonitor/guide.html) (öffnet im Browser, kein Account nötig).
 
 ## Was die Firmware macht
 

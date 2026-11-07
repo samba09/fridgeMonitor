@@ -23,7 +23,7 @@ Ersatzteile für ein zweites Gerät sind dabei, außer dem Ladegerät.
 
 ## Verkabelung
 
-Das ELEGOO-Board ist ein ESP32 DevKit mit 30 Stiften. Die Pins sind mit „D23“, „RX2“ usw. beschriftet. Bebilderte Anleitung: `anleitung.html`.
+Das ELEGOO-Board ist ein ESP32 DevKit mit 30 Stiften. Die Pins sind mit „D23“, „RX2“ usw. beschriftet. Bebilderte Anleitung: [anleitung.html](https://samba09.github.io/fridgeMonitor/anleitung.html).
 
 **Erst alles verkabeln, dann USB einstecken.** Nach dem Aufdruck neben den Pins gehen, z. B. „23“, „D23“ oder „G23“.
 
