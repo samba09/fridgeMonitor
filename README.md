@@ -7,7 +7,7 @@ Parts and wiring: [partlist.md](partlist.md) (German). **Illustrated build guide
 
 ## What the firmware does
 
-- **Display:** shows the two probes alternately every 3 s, in whole degrees (`-18°`, ` 12°`); from 0.0 to 9.9 °C with one decimal and `_` as decimal separator (`4_5°` = 4.5 °C), because the display has no decimal points. `----` means the probe is not delivering readings.
+- **Display:** shows the two probes alternately every 3 s, in whole degrees (`-18°`, ` 12°`); from 0.0 to 9.9 °C with one decimal (`4,5°`), using the lower-left segment as the decimal mark, because the display has no decimal points. `----` means the probe is not delivering readings.
 - **Own WiFi hotspot for setup:** network **`Kuehlschrank`**, default password **`kuehlschrank`** (change it on the web page). After joining, the page usually opens by itself; otherwise open **http://192.168.4.1** in a browser.
 - **Web page:** current temperatures and a 24-hour history per probe (one value per minute) with min, max and average. Also probe names, display brightness, swapping probes, WiFi and firmware update.
 - **Home WiFi (optional):** can be entered on the web page. The page is then reachable on the home network (`http://kuehlschrank.local` or the IP address shown on the display), and the clock is set from the internet. Without internet, the ESP takes the time from the phone as soon as the page is opened.

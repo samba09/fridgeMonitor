@@ -19,7 +19,7 @@ Ersatzteile für ein zweites Gerät sind dabei, außer dem Ladegerät.
 - **Ladegerät:** Es muss **USB-A** sein (rechteckiger Stecker), dazu ein Kabel **USB-A auf USB-C**. Viele günstige ESP32-Boards laufen an reinen USB-C-Ladegeräten (C-auf-C) nicht.
 - **Kabel:** Mit **Datenübertragung**, damit es auch zum Flashen am PC taugt.
 - **Fühler-Set:** Auf der Adapterplatine sind der Widerstand und die Stifte schon aufgelötet. Liegt zusätzlich ein loser Widerstand bei, wird er nicht gebraucht.
-- **Display:** Es hat einen Doppelpunkt und keine Dezimalpunkte. Der Doppelpunkt wird in der Firmware abgeschaltet. Angezeigt werden ganze Grad, von 0,0 bis 9,9 °C mit einer Nachkommastelle und Unterstrich als Komma (`4_5°`).
+- **Display:** Es hat einen Doppelpunkt und keine Dezimalpunkte. Der Doppelpunkt wird in der Firmware abgeschaltet. Angezeigt werden ganze Grad, von 0,0 bis 9,9 °C mit einer Nachkommastelle (`4,5°`, das untere linke Segment dient als Komma).
 
 ## Verkabelung
 

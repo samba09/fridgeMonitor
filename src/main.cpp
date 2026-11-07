@@ -5,7 +5,7 @@
 //   optionally off while the home WiFi works)
 // - Optional: joins the home WiFi (configured on the web page)
 // - Display alternates between the two probes (whole degrees; 0.0 to 9.9 °C with one
-//   decimal, "_" as decimal separator because the display has no decimal points)
+//   decimal, the lower-left segment as decimal comma: the display has no decimal points)
 // - History: 1 value per minute and probe, 24 h, kept in RAM
 // - Firmware update via web page
 //
@@ -342,8 +342,8 @@ void handleSensors() {
 }
 
 // ---------------------------------------------------------------- display
-// Whole degrees ("  4°" style, "-18°"), except 0.0 to 9.9 °C: one decimal with "_" as
-// decimal separator ("4_5°"), since the display has a colon but no decimal points.
+// Whole degrees (" 12°", "-18°"), except 0.0 to 9.9 °C: one decimal with the lower-left
+// segment of digit 1 as decimal comma ("4,5°"), since the display has no decimal points.
 void formatTemp(float t, uint8_t out[4]) {
   for (int k = 0; k < 4; k++) out[k] = seg::BLANK;
   if (isnan(t)) {
@@ -353,7 +353,7 @@ void formatTemp(float t, uint8_t out[4]) {
   long tenths = lroundf(t * 10.0f);
   if (tenths >= 0 && tenths <= 99) {
     out[0] = seg::DIGITS[tenths / 10];
-    out[1] = seg::UNDERSCORE;
+    out[1] = seg::COMMA;
     out[2] = seg::DIGITS[tenths % 10];
     out[3] = seg::DEGREE;
     return;

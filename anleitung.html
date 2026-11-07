@@ -182,10 +182,10 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   <h1>Kühlschrank-Monitor</h1>
   <p class="lede">Zwei Temperaturfühler messen, wie kalt es im Kühlschrank und im Gefrierfach ist. Eine Anzeige außen zeigt abwechselnd beide Temperaturen. Über das eigene WLAN siehst du auf dem Handy den Verlauf der letzten 24 Stunden.</p>
   <div class="heroDisplays">
-    <svg class="seg7" data-text="4_5°" role="img" aria-label="Anzeige: 4,5 Grad"></svg>
+    <svg class="seg7" data-text="4,5°" role="img" aria-label="Anzeige: 4,5 Grad"></svg>
     <svg class="seg7" data-text="-18°" role="img" aria-label="Anzeige: minus 18 Grad"></svg>
   </div>
-  <p class="muted" style="font-size:14px">So sieht die Anzeige aus. Ein echtes Gradzeichen hat sie nicht: Das kleine Quadrat oben rechts sind die vier oberen Segmente der letzten Ziffer. Auch einen Dezimalpunkt gibt es nicht. Von 0,0 bis 9,9 °C zeigt sie deshalb eine Nachkommastelle mit Unterstrich als Komma: <code>4_5°</code> heißt 4,5 °C. Alles andere in ganzen Grad. Der Doppelpunkt bleibt immer aus.</p>
+  <p class="muted" style="font-size:14px">So sieht die Anzeige aus. Ein echtes Gradzeichen hat sie nicht: Das kleine Quadrat oben rechts sind die vier oberen Segmente der letzten Ziffer. Auch einen Dezimalpunkt gibt es nicht. Von 0,0 bis 9,9 °C zeigt sie deshalb eine Nachkommastelle und nutzt das untere linke Segment als Komma, wie oben bei 4,5 °C. Alles andere in ganzen Grad. Der Doppelpunkt bleibt immer aus.</p>
 </header>
 
 <div class="progress" aria-live="polite"><div class="bar"><i id="barfill"></i></div><span id="bartext">0 von 7 Schritten</span></div>
@@ -408,7 +408,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       <svg class="seg7" data-text=" 168" x="220" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text="   4" x="330" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text="   1" x="440" y="20" width="104" height="44"></svg>
-      <svg class="seg7" data-text="4_5°" x="580" y="10" width="104" height="44"></svg>
+      <svg class="seg7" data-text="4,5°" x="580" y="10" width="104" height="44"></svg>
       <svg class="seg7" data-text="-18°" x="580" y="80" width="104" height="44"></svg>
       <path class="arrow" d="M548 42 h22"/><path class="arrowhead" d="M570 37 l7 5 l-7 5z"/>
       <path class="arrow" d="M690 34 C705 50 705 88 690 102"/><path class="arrowhead" d="M693 97 l-6 7 l9 1z"/>
@@ -455,7 +455,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       <text class="small" x="96" y="24">Scharnierseite</text>
       <!-- ESP + display -->
       <rect x="112" y="64" width="64" height="30" rx="3" fill="var(--pcb)"/>
-      <svg class="seg7" data-text="4_5°" x="116" y="68" width="56" height="22"></svg>
+      <svg class="seg7" data-text="4,5°" x="116" y="68" width="56" height="22"></svg>
       <rect x="128" y="98" width="32" height="44" rx="3" fill="var(--board)" stroke="var(--board-edge)"/>
       <text class="lbl" x="14" y="80">Anzeige + ESP</text>
       <text class="small" x="14" y="96">außen, seitlich oben</text>
@@ -592,7 +592,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 (function(){
 /* ---------- 7-segment display (TM1637, 0.36", 4 digits, colon, no decimal points) ---------- */
 const MASK={'0':0x3f,'1':0x06,'2':0x5b,'3':0x4f,'4':0x66,'5':0x6d,'6':0x7d,'7':0x07,'8':0x7f,'9':0x6f,
-  '-':0x40,'°':0x63,'_':0x08,'A':0x77,'P':0x73,' ':0};
+  '-':0x40,'°':0x63,',':0x10,'A':0x77,'P':0x73,' ':0};
 const DW=34,DH=60,T=7,GAP=12,COLON=12,PADX=10,PADY=9,SKEW=-0.12;
 const VBW=PADX*2+8+DW*4+GAP*3+COLON+6, VBH=PADY*2+DH;
 function hseg(x,y,xa,xb){const h=T/2;return[[xa+1,y],[xa+1+h,y-h],[xb-1-h,y-h],[xb-1,y],[xb-1-h,y+h],[xa+1+h,y+h]].map(p=>[p[0]+x,p[1]])}

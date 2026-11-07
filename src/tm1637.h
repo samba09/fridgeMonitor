@@ -10,7 +10,7 @@ constexpr uint8_t DIGITS[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 
 constexpr uint8_t BLANK = 0x00;
 constexpr uint8_t MINUS = 0x40;
 constexpr uint8_t DEGREE = 0x63;
-constexpr uint8_t UNDERSCORE = 0x08;  // segment D only, used as decimal separator
+constexpr uint8_t COMMA = 0x10;  // segment E (lower left) only, used as decimal comma
 constexpr uint8_t A = 0x77, C = 0x39, E = 0x79, F = 0x71, H = 0x76, I = 0x06, L = 0x38,
                   N = 0x54, O = 0x5c, P = 0x73, R = 0x50, S = 0x6d, T = 0x78, U = 0x3e;
 }  // namespace seg
