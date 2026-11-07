@@ -3,27 +3,41 @@
   "author": "fridgeMonitor",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "board-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
     {
       "type": "wokwi-tm1637-7segment",
       "id": "display",
-      "top": -96,
-      "left": 160,
-      "attrs": { "color": "red" }
+      "top": 60,
+      "left": -260,
+      "attrs": {
+        "color": "red"
+      }
     },
     {
       "type": "wokwi-ds18b20",
       "id": "fridge",
       "top": 140,
       "left": 230,
-      "attrs": { "temperature": "4.5", "deviceID": "0B2F6A3D4E12" }
+      "attrs": {
+        "temperature": "4.5",
+        "deviceID": "0B2F6A3D4E12"
+      }
     },
     {
       "type": "wokwi-ds18b20",
       "id": "freezer",
       "top": 140,
       "left": 330,
-      "attrs": { "temperature": "-18.2", "deviceID": "0B2F6A1C9A07" }
+      "attrs": {
+        "temperature": "-18.2",
+        "deviceID": "0B2F6A1C9A07"
+      }
     },
     {
       "type": "wokwi-resistor",
@@ -31,27 +45,96 @@
       "top": 90,
       "left": 210,
       "rotate": 90,
-      "attrs": { "value": "4700" }
+      "attrs": {
+        "value": "4700"
+      }
     }
   ],
   "connections": [
-    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
-    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
-
-    [ "display:CLK", "esp:D18", "blue", [] ],
-    [ "display:DIO", "esp:D23", "green", [] ],
-    [ "display:VCC", "esp:3V3", "orange", [] ],
-    [ "display:GND", "esp:GND.2", "black", [] ],
-
-    [ "fridge:VCC", "esp:RX2", "red", [] ],
-    [ "fridge:DQ", "esp:D4", "gold", [] ],
-    [ "fridge:GND", "esp:GND.1", "black", [] ],
-    [ "freezer:VCC", "fridge:VCC", "red", [] ],
-    [ "freezer:DQ", "fridge:DQ", "gold", [] ],
-    [ "freezer:GND", "fridge:GND", "black", [] ],
-
-    [ "pullup:1", "esp:RX2", "red", [] ],
-    [ "pullup:2", "esp:D4", "gold", [] ]
+    [
+      "esp:TX0",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX0",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "display:CLK",
+      "esp:D18",
+      "blue",
+      []
+    ],
+    [
+      "display:DIO",
+      "esp:D23",
+      "green",
+      []
+    ],
+    [
+      "display:VCC",
+      "esp:3V3",
+      "orange",
+      []
+    ],
+    [
+      "display:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "fridge:VCC",
+      "esp:RX2",
+      "red",
+      []
+    ],
+    [
+      "fridge:DQ",
+      "esp:D4",
+      "gold",
+      []
+    ],
+    [
+      "fridge:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "freezer:VCC",
+      "fridge:VCC",
+      "red",
+      []
+    ],
+    [
+      "freezer:DQ",
+      "fridge:DQ",
+      "gold",
+      []
+    ],
+    [
+      "freezer:GND",
+      "fridge:GND",
+      "black",
+      []
+    ],
+    [
+      "pullup:1",
+      "esp:RX2",
+      "red",
+      []
+    ],
+    [
+      "pullup:2",
+      "esp:D4",
+      "gold",
+      []
+    ]
   ],
   "dependencies": {}
 }
