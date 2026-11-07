@@ -9,7 +9,7 @@
       "id": "display",
       "top": -96,
       "left": 160,
-      "attrs": { "color": "red", "type": "colon" }
+      "attrs": { "color": "red" }
     },
     {
       "type": "wokwi-ds18b20",
