@@ -131,6 +131,8 @@ button.copy{font:inherit;font-size:14px;border:1px solid var(--rule);background:
 .shots > figure{margin:0;min-width:0;display:grid;gap:8px}
 .shots img{display:block;width:100%;max-width:360px;height:auto;border-radius:18px;border:6px solid var(--ink);box-shadow:0 6px 20px rgba(20,33,43,.18);background:#f4f5f7}
 @media (max-width:560px){.shots{grid-template-columns:1fr}.shots img{max-width:300px}}
+.langswitch{justify-self:start;font-size:14px;text-decoration:none;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:99px;padding:4px 12px}
+.langswitch:hover{border-color:var(--accent)}
 /* SVG theming */
 svg text{font-family:var(--font-body);fill:var(--ink)}
 svg .lbl{font-size:13px}
@@ -175,6 +177,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <div class="wrap">
 
 <header class="hero">
+  <a class="langswitch" href="guide.html" hreflang="en" lang="en">English version →</a>
   <div class="eyebrow">Bauanleitung · ohne Löten · ca. 45 Minuten</div>
   <h1>Kühlschrank-Monitor</h1>
   <p class="lede">Zwei Fühler messen Kühlschrank und Gefrierfach. Eine Anzeige außen zeigt abwechselnd beide Temperaturen. Über das eigene WLAN siehst du auf dem Handy den Verlauf der letzten 24 Stunden.</p>
