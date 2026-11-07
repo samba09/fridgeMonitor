@@ -180,7 +180,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   <a class="langswitch" href="guide.html" hreflang="en" lang="en">English version →</a>
   <div class="eyebrow">Bauanleitung · ohne Löten · ca. 45 Minuten</div>
   <h1>Kühlschrank-Monitor</h1>
-  <p class="lede">Zwei Fühler messen Kühlschrank und Gefrierfach. Eine Anzeige außen zeigt abwechselnd beide Temperaturen. Über das eigene WLAN siehst du auf dem Handy den Verlauf der letzten 24 Stunden.</p>
+  <p class="lede">Zwei Temperaturfühler messen, wie kalt es im Kühlschrank und im Gefrierfach ist. Eine Anzeige außen zeigt abwechselnd beide Temperaturen. Über das eigene WLAN siehst du auf dem Handy den Verlauf der letzten 24 Stunden.</p>
   <div class="heroDisplays">
     <svg class="seg7" data-text="  4°" role="img" aria-label="Anzeige: 4 Grad"></svg>
     <svg class="seg7" data-text="-18°" role="img" aria-label="Anzeige: minus 18 Grad"></svg>
@@ -198,14 +198,14 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <section class="step" id="teile">
   <h2>Was auf dem Tisch liegen sollte</h2>
   <div class="parts">
-    <div class="part"><b>ESP32-Board</b><span>ELEGOO, schwarz, mit USB-C. Das zweite aus der Packung ist Ersatz.</span></div>
-    <div class="part"><b>2 Temperaturfühler</b><span>Metallhülse mit Kabel und drei Drähten am Ende</span></div>
+    <div class="part"><b>ESP32-Board</b><span>ELEGOO, schwarz, mit USB-C. Das zweite Board aus der Packung dient als Ersatz.</span></div>
+    <div class="part"><b>2 Temperaturfühler</b><span>Mit Metallhülse, Kabel und drei Anschlussdrähten</span></div>
     <div class="part"><b>1 Adapterplatine</b><span>Aus dem Fühler-Set. Die zweite und der lose Widerstand bleiben übrig.</span></div>
-    <div class="part"><b>Anzeige (TM1637)</b><span>Blaue Platine mit 4 roten Ziffern und 4 Stiften an der Seite</span></div>
-    <div class="part"><b>7 Steckkabel Buchse–Buchse</b><span>Die Enden mit Loch. 3 davon sind schon beim Fühler-Set dabei.</span></div>
+    <div class="part"><b>Anzeige (TM1637)</b><span>Blaue Platine mit vier roten Ziffern und vier Pins an der Seite</span></div>
+    <div class="part"><b>7 Steckkabel (Buchse–Buchse)</b><span>Mit Steckbuchsen an beiden Enden. Drei davon sind schon beim Fühler-Set dabei.</span></div>
     <div class="part"><b>USB-Ladegerät und Kabel</b><span>USB-A (rechteckig) auf USB-C</span></div>
     <div class="part"><b>Kleiner Schraubendreher</b><span>Schlitz, 2–3 mm, für die Klemmen</span></div>
-    <div class="part"><b>Klebeband und Klettstreifen</b><span>Malerkrepp oder Gewebeband für die Kabel, Klett für den ESP</span></div>
+    <div class="part"><b>Klebeband und Klettstreifen</b><span>Malerkrepp oder Gewebeband für die Kabel, Klett für den ESP32</span></div>
   </div>
   <div class="note tip"><b class="lab">Tipp</b><p>Stecke das USB-Kabel erst in Schritt 5 ein. Solange Strom fließt, wird nichts umgesteckt.</p></div>
 </section>
@@ -213,10 +213,10 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <!-- ============================================================ BOARD -->
 <section class="step" id="board">
   <h2>Das ESP32-Board kennenlernen</h2>
-  <p>So sieht dein Board von oben aus: Antenne oben, USB-C unten. Neben jedem Stift steht seine Bezeichnung. Du brauchst nur die farbig markierten. Fast alle sitzen auf der <b>rechten Seite</b>.</p>
+  <p>So sieht dein Board von oben aus: Antenne oben, USB-C unten. Neben jedem Pin steht seine Bezeichnung. Du brauchst nur die farbig markierten. Fast alle sitzen auf der <b>rechten Seite</b>.</p>
   <figure class="figure">
     <svg id="boardfig" viewBox="0 0 640 420" role="img" aria-labelledby="bft">
-      <title id="bft">ESP32 DevKit mit 30 Stiften von oben, Antenne oben, USB-C unten. Markiert: rechts D23, D18, RX2, D4, GND, 3V3 und links GND.</title>
+      <title id="bft">ESP32 DevKit mit 30 Pins von oben, Antenne oben, USB-C unten. Markiert: rechts D23, D18, RX2, D4, GND, 3V3 und links GND.</title>
       <g id="boardA" transform="translate(190,40)"></g>
       <g class="lbl">
         <text x="440" y="112">Anzeige DIO</text>
@@ -228,14 +228,14 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
         <text x="20" y="310">Anzeige GND</text>
       </g>
     </svg>
-    <figcaption>Nachgezeichnet nach dem ELEGOO-Board (ESP32 DevKit, 30 Stifte, USB-C, Chip CP2102). Fotos des echten Boards: <a href="https://www.amazon.de/dp/B0D8T7LZF2" target="_blank" rel="noopener">Amazon-Angebot</a>.</figcaption>
+    <figcaption>Nachgezeichnet nach dem ELEGOO-Board (ESP32 DevKit, 30 Pins, USB-C, Chip CP2102). Fotos des echten Boards: <a href="https://www.amazon.de/dp/B0D8T7LZF2" target="_blank" rel="noopener">Amazon-Angebot</a>.</figcaption>
   </figure>
   <div class="note warn"><b class="lab">Achtung: „16“ heißt „RX2“</b><p>Der Pin, den die Firmware als GPIO 16 benutzt, ist auf diesem Board mit <span class="pin">RX2</span> beschriftet. Er sitzt rechts zwischen <span class="pin">TX2</span> und <span class="pin">D4</span>.</p></div>
 </section>
 
 <!-- ============================================================ STEP 1 -->
 <section class="step" id="s1">
-  <div class="stephead"><div class="num">1</div><div><h2>Beide Fühler an eine Adapterplatine</h2><p class="muted">Beide Fühler kommen an dieselbe Platine. In jede Klemme gehören zwei Drähte gleicher Farbe.</p></div></div>
+  <div class="stephead"><div class="num">1</div><div><h2>Beide Fühler an eine Adapterplatine</h2><p class="muted">Beide Fühler werden an dieselbe Platine angeschlossen. In jede Klemme gehören zwei Drähte gleicher Farbe.</p></div></div>
 
   <figure class="figure">
     <svg viewBox="0 0 640 300" role="img" aria-labelledby="f1t">
@@ -277,23 +277,23 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   </figure>
 
   <ol class="do">
-    <li>Die Klemmschrauben ein paar Umdrehungen aufdrehen.</li>
+    <li>Die Klemmschrauben um ein paar Umdrehungen lösen.</li>
     <li>Den <b>roten</b> Draht von Fühler A <b>und</b> den roten Draht von Fühler B zusammen in die Klemme <span class="pin">VCC</span> stecken (manchmal „+“ oder „V“). Schraube festdrehen.</li>
     <li>Genauso die beiden <b>gelben</b> Drähte in <span class="pin">DAT</span> (manchmal „DQ“, „S“ oder „OUT“). Ist der Datendraht weiß oder blau, gehört er hierhin.</li>
     <li>Die beiden <b>schwarzen</b> Drähte in <span class="pin">GND</span> (manchmal „–“).</li>
     <li>Ziehtest: An jedem Draht leicht ziehen. Keiner darf herausrutschen.</li>
   </ol>
-  <div class="note tip"><b class="lab">Warum nur eine Platine?</b><p>Beide Fühler teilen sich eine Datenleitung. Jeder hat eine eigene Seriennummer, darüber unterscheidet der ESP sie. Eine Platine bedeutet nur 3 Kabel zum ESP.</p></div>
+  <div class="note tip"><b class="lab">Warum nur eine Platine?</b><p>Beide Fühler teilen sich eine Datenleitung. Jeder hat eine eigene Seriennummer, darüber unterscheidet der ESP32 sie. So brauchst du nur drei Kabel zum ESP32.</p></div>
   <label class="done"><input type="checkbox" id="c1" data-step> Fühler sind angeschlossen</label>
 </section>
 
 <!-- ============================================================ STEP 2 -->
 <section class="step" id="s2">
-  <div class="stephead"><div class="num">2</div><div><h2>Adapterplatine an den ESP32</h2><p class="muted">Drei Steckkabel, alle auf die rechte Seite des Boards.</p></div></div>
+  <div class="stephead"><div class="num">2</div><div><h2>Adapterplatine an den ESP32</h2><p class="muted">Drei Steckkabel, alle an der rechten Seite des Boards.</p></div></div>
 
   <figure class="figure">
     <svg id="fig2" viewBox="0 0 720 420" role="img" aria-labelledby="f2t">
-      <title id="f2t">Adapterplatine rechts neben dem ESP32: rotes Kabel von VCC an RX2, gelbes von DAT an D4, schwarzes von GND an GND, alle auf der rechten Stiftreihe</title>
+      <title id="f2t">Adapterplatine rechts neben dem ESP32: rotes Kabel von VCC an RX2, gelbes von DAT an D4, schwarzes von GND an GND, alle auf der rechten Pinreihe</title>
       <g id="boardB" transform="translate(150,40)"></g>
       <!-- adapter -->
       <g transform="translate(520,200)">
@@ -308,24 +308,24 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       </g>
       <g id="wires2"></g>
     </svg>
-    <figcaption>Das Board von oben, Antenne oben. Die Kabelfarben sind die vom Fühler-Set.</figcaption>
+    <figcaption>Das Board von oben gesehen, mit der Antenne oben. Die Kabelfarben sind die vom Fühler-Set.</figcaption>
   </figure>
 
   <div class="tablewrap"><table class="map">
     <thead><tr><th>Adapterplatine</th><th>Aufdruck am ESP32</th><th>Wo</th></tr></thead>
     <tbody>
-      <tr><td><span class="dot" style="background:var(--w-red)"></span><b>VCC</b></td><td><span class="pin">RX2</span></td><td>rechts, 10. Stift von oben. Nicht an 3V3.</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-red)"></span><b>VCC</b></td><td><span class="pin">RX2</span></td><td>rechts, 10. Pin von oben. Nicht an 3V3.</td></tr>
       <tr><td><span class="dot" style="background:var(--w-yellow)"></span><b>DAT</b></td><td><span class="pin">D4</span></td><td>rechts, direkt unter RX2</td></tr>
-      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td>rechts, vorletzter Stift</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td>rechts, vorletzter Pin</td></tr>
     </tbody>
   </table></div>
-  <div class="note tip"><b class="lab">Warum kommt der Fühler-Strom aus RX2?</b>
+  <div class="note tip"><b class="lab">Warum werden die Fühler über RX2 mit Strom versorgt?</b>
     <p><b>RX2 ist nur ein Name.</b> Dahinter steckt der ganz normale Pin GPIO 16. Er heißt so, weil er auch als Empfangsleitung einer seriellen Schnittstelle dienen <i>kann</i>. Die Firmware nutzt ihn stattdessen als Ausgang und schaltet ihn auf „an“. Dann liegen dort 3,3 V an, genau wie am 3V3-Pin.</p>
-    <p><b>Ein Ausgang als Stromquelle?</b> Ja, für kleine Ströme geht das. Ein Pin des ESP32 liefert gut 20 mA. Beide Fühler zusammen brauchen nur 2–3 mA. Für die Anzeige reicht es nicht, die zieht bis zu 80 mA und hängt deshalb am echten 3V3-Pin. Den gibt es nur einmal, und auf jeden Stift passt nur ein Kabel.</p>
-    <p><b>Bonus:</b> Weil der ESP den Fühler-Strom selbst schaltet, kann er hängende Fühler kurz aus- und wieder einschalten. Das passiert automatisch, wenn er dreimal hintereinander keinen Fühler findet oder ein Fühler 3 Minuten lang keine gültigen Werte liefert.</p>
+    <p><b>Ein Ausgang als Stromquelle?</b> Ja, für kleine Ströme geht das. Ein Pin des ESP32 kann etwa 20 mA liefern. Beide Fühler zusammen brauchen nur 2–3 mA. Für die Anzeige reicht es nicht, die zieht bis zu 80 mA und hängt deshalb am echten 3V3-Pin. Den gibt es nur einmal, und auf jeden Pin passt nur ein Kabel.</p>
+    <p><b>Bonus:</b> Weil der ESP32 den Fühler-Strom selbst schaltet, kann er hängende Fühler kurz aus- und wieder einschalten. Das passiert automatisch, wenn er dreimal hintereinander keinen Fühler findet oder ein Fühler 3 Minuten lang keine gültigen Werte liefert.</p>
   </div>
-  <div class="note warn"><b class="lab">Nicht verwechseln</b><p><span class="pin">RX0</span> und <span class="pin">TX0</span> (rechts, 3. und 4. Stift) gehören zur USB-Verbindung. Dort darf nichts angeschlossen werden.</p></div>
-  <label class="done"><input type="checkbox" id="c2" data-step> Adapterplatine ist am ESP</label>
+  <div class="note warn"><b class="lab">Nicht verwechseln</b><p><span class="pin">RX0</span> und <span class="pin">TX0</span> (rechts, 3. und 4. Pin) gehören zur USB-Verbindung. Dort darf nichts angeschlossen werden.</p></div>
+  <label class="done"><input type="checkbox" id="c2" data-step> Adapterplatine ist am ESP32 angeschlossen</label>
 </section>
 
 <!-- ============================================================ STEP 3 -->
@@ -347,33 +347,33 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
         <text class="pcbtext" x="186" y="51" text-anchor="end" style="font-size:8px">VCC</text>
         <text class="pcbtext" x="186" y="67" text-anchor="end" style="font-size:8px">GND</text>
       </g>
-      <text class="small" x="470" y="100">Anzeige (Stifte laut Aufdruck)</text>
+      <text class="small" x="470" y="100">Anzeige (Pins laut Aufdruck)</text>
       <g id="wires3"></g>
     </svg>
-    <figcaption>Blass: die Kabel aus Schritt 2. Bei der Anzeige gilt die Beschriftung an ihren Stiften.</figcaption>
+    <figcaption>Blass: die Kabel aus Schritt 2. Bei der Anzeige gilt die Beschriftung an ihren Pins.</figcaption>
   </figure>
 
   <div class="tablewrap"><table class="map">
     <thead><tr><th>Anzeige</th><th>Aufdruck am ESP32</th><th>Wo</th></tr></thead>
     <tbody>
-      <tr><td><span class="dot" style="background:var(--w-orange)"></span><b>VCC</b></td><td><span class="pin">3V3</span></td><td>rechts, letzter Stift. <b>Nicht an VIN</b>, das sind 5 V.</td></tr>
-      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td><b>links</b>, vorletzter Stift (neben VIN)</td></tr>
-      <tr><td><span class="dot" style="background:var(--w-green)"></span><b>DIO</b></td><td><span class="pin">D23</span></td><td>rechts, oberster Stift</td></tr>
-      <tr><td><span class="dot" style="background:var(--w-blue)"></span><b>CLK</b></td><td><span class="pin">D18</span></td><td>rechts, 7. Stift von oben</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-orange)"></span><b>VCC</b></td><td><span class="pin">3V3</span></td><td>rechts, letzter Pin. <b>Nicht an VIN</b>, das sind 5 V.</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td><b>links</b>, vorletzter Pin (neben VIN)</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-green)"></span><b>DIO</b></td><td><span class="pin">D23</span></td><td>rechts, oberster Pin</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-blue)"></span><b>CLK</b></td><td><span class="pin">D18</span></td><td>rechts, 7. Pin von oben</td></tr>
     </tbody>
   </table></div>
   <div class="note tip"><b class="lab">Tipp</b><p>Nimm für Strom ein rotes oder oranges Kabel und für GND ein schwarzes. Dann siehst du beim Prüfen sofort, was wohin gehört.</p></div>
-  <label class="done"><input type="checkbox" id="c3" data-step> Anzeige ist am ESP</label>
+  <label class="done"><input type="checkbox" id="c3" data-step> Anzeige ist am ESP32 angeschlossen</label>
 </section>
 
 <!-- ============================================================ STEP 4 -->
 <section class="step" id="s4">
-  <div class="stephead"><div class="num">4</div><div><h2>Prüfen, bevor Strom drauf kommt</h2><p class="muted">Zwei Minuten, die Ärger sparen. Vertauschte Kabel sind der einzige Fehler, der wirklich etwas kaputt machen kann.</p></div></div>
+  <div class="stephead"><div class="num">4</div><div><h2>Alles prüfen, bevor der Strom eingeschaltet wird</h2><p class="muted">Zwei Minuten, die Ärger sparen. Vertauschte Kabel sind der einzige Fehler, der wirklich etwas kaputt machen kann.</p></div></div>
   <ul class="do">
     <li>Fühler-VCC steckt an <span class="pin">RX2</span> und nicht an 3V3.</li>
     <li>Anzeige-VCC steckt an <span class="pin">3V3</span> und nicht an <span class="pin">VIN</span>.</li>
     <li>Kein GND-Kabel steckt an einem Strom-Pin und umgekehrt.</li>
-    <li>Alle 7 Steckkabel sitzen ganz auf den Stiften, keines hängt schief.</li>
+    <li>Alle sieben Steckkabel sitzen ganz auf den Pins, keines hängt schief.</li>
     <li>Keine blanken Drahtenden berühren sich an der Adapterplatine.</li>
   </ul>
   <label class="done"><input type="checkbox" id="c4" data-step> Alles geprüft</label>
@@ -387,14 +387,14 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <li>ESP32 mit dem USB-Kabel an den PC anschließen. Auf dem Board leuchtet eine rote LED.</li>
     <li>In Chrome oder Edge diese Seite öffnen:
       <div class="copyrow" style="margin-top:6px"><code id="flashurl">https://espressif.github.io/esptool-js/</code><button class="copy" type="button" data-copy="flashurl">Kopieren</button><a href="https://espressif.github.io/esptool-js/" target="_blank" rel="noopener">öffnen</a></div></li>
-    <li>Bei <b>Baudrate</b> <code>460800</code> wählen und auf <b>Connect</b> klicken. Im Fenster den Eintrag mit „CP210x“ wählen.</li>
+    <li>Als <b>Baudrate</b> <code>460800</code> auswählen und auf <b>Connect</b> klicken. Im Fenster den Eintrag mit „CP210x“ wählen.</li>
     <li>Steht dort lange „Connecting…“: die Taste <b>BOOT</b> (rechts neben der USB-Buchse) gedrückt halten, bis es weitergeht.</li>
     <li>Unter „Program“ bei <b>Flash Address</b> <code>0x0</code> eintragen und die Datei <code>kuehlschrank-full.bin</code> auswählen.</li>
     <li>Auf <b>Program</b> klicken und warten, bis 100 % erreicht sind (etwa 30 Sekunden).</li>
     <li>Die Taste <b>EN</b> (links neben der USB-Buchse) drücken, oder das USB-Kabel kurz abziehen und wieder einstecken.</li>
   </ol>
   <div class="note warn"><b class="lab">Kein Port in der Liste?</b><p>Dann fehlt der USB-Treiber „CP210x“ von Silicon Labs. Windows installiert ihn meist von selbst, sonst einmal von der Silicon-Labs-Seite installieren und den Browser neu laden. Prüfe auch, ob das Kabel Daten überträgt. Reine Ladekabel gehen nicht.</p></div>
-  <label class="done"><input type="checkbox" id="c5" data-step> Firmware ist drauf</label>
+  <label class="done"><input type="checkbox" id="c5" data-step> Firmware ist installiert</label>
 </section>
 
 <!-- ============================================================ STEP 6 -->
@@ -428,21 +428,21 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <li>Am Handy das WLAN <b>Kuehlschrank</b> wählen, Passwort <b>kuehlschrank</b>.</li>
     <li>Meist öffnet sich die Seite von selbst. Sonst im Browser <code>192.168.4.1</code> eingeben.</li>
     <li>Fragt das Handy „Dieses Netz hat kein Internet, trotzdem verbunden bleiben?“: <b>Ja</b>.</li>
-    <li>Einen Fühler in der Hand halten. Nach ein paar Sekunden steigt sein Wert Richtung 30 °C. So weißt du, welcher welcher ist.</li>
+    <li>Einen Fühler in der Hand halten. Nach ein paar Sekunden steigt sein Wert Richtung 30 °C. So kannst du die beiden Fühler unterscheiden.</li>
   </ol>
-  <div class="note tip"><b class="lab">Namen</b><p>Ein Fühler unter −5 °C heißt automatisch „Gefrierfach“, sonst „Kühlschrank“. Beim ersten Start auf dem Tisch heißen also beide „Kühlschrank“. Auf der Webseite unter <b>Einstellungen</b> kannst du sie umbenennen oder tauschen.</p></div>
+  <div class="note tip"><b class="lab">Namen</b><p>Ein Fühler, der weniger als −5 °C misst, heißt automatisch „Gefrierfach“, sonst „Kühlschrank“. Beim ersten Start auf dem Tisch heißen also beide „Kühlschrank“. Auf der Webseite unter <b>Einstellungen</b> kannst du sie umbenennen oder tauschen.</p></div>
   <div class="note warn"><b class="lab">Eigenes Passwort setzen</b><p>Das Hotspot-Passwort „kuehlschrank“ steht öffentlich im Internet. Auf der Webseite unter <b>WLAN → Hotspot</b> ein eigenes Passwort eintragen (mindestens 8 Zeichen). Danach das Handy mit dem neuen Passwort wieder verbinden.</p></div>
   <div class="note tip"><b class="lab">Heim-WLAN (optional)</b><p>Unter <b>WLAN</b> das Heim-WLAN auswählen und das Passwort eingeben. Die Anzeige zeigt dann <code>IP</code> und die neue Adresse, alternativ geht <code>http://kuehlschrank.local</code>. Nach etwa einer Minute schaltet sich der Hotspot ab, die Seite ist dann nur noch im Heim-WLAN erreichbar. Fällt das Heim-WLAN aus, ist der Hotspot nach 2 Minuten wieder da.</p></div>
-  <label class="done"><input type="checkbox" id="c6" data-step> Seite geht auf dem Handy</label>
+  <label class="done"><input type="checkbox" id="c6" data-step> Webseite lässt sich auf dem Handy öffnen</label>
 </section>
 
 <!-- ============================================================ STEP 7 -->
 <section class="step" id="s7">
-  <div class="stephead"><div class="num">7</div><div><h2>Am Kühlschrank einbauen</h2><p class="muted">Elektronik außen, nur die Fühler kommen nach innen.</p></div></div>
+  <div class="stephead"><div class="num">7</div><div><h2>Am Kühlschrank einbauen</h2><p class="muted">Die Elektronik bleibt außen. Nur die Fühler kommen in den Kühlschrank.</p></div></div>
 
   <figure class="figure">
     <svg viewBox="0 0 640 430" role="img" aria-labelledby="f7t">
-      <title id="f7t">Kühlschrank von vorne: ESP und Anzeige außen oben an der Seite, Fühlerkabel mit Klebeband am Gehäuse gesichert und an der Scharnierseite durch die Dichtung, ein Fühler mittig im Kühlteil, einer mittig im Gefrierfach</title>
+      <title id="f7t">Kühlschrank von vorne: ESP32 und Anzeige außen oben an der Seite, Fühlerkabel mit Klebeband am Gehäuse gesichert und an der Scharnierseite durch die Dichtung, ein Fühler mittig im Kühlteil, einer mittig im Gefrierfach</title>
       <rect class="outline" x="190" y="30" width="230" height="370" rx="10"/>
       <rect class="inside" x="204" y="44" width="202" height="210" rx="4"/>
       <rect class="inside" x="204" y="270" width="202" height="118" rx="4" style="fill:var(--bg)"/>
@@ -491,9 +491,9 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   </figure>
 
   <ol class="do">
-    <li><b>Anzeige und ESP</b> mit Klettband außen an die Seite oder oben auf den Kühlschrank. Nicht hinten auf die Metallrückwand: Dort wird es warm und das WLAN ist schwach.</li>
-    <li><b>Fühler Kühlteil</b> ins mittlere Fach, vorne bis Mitte. Nicht an die Rückwand legen, die ist beim Kühlen eiskalt und verfälscht den Wert.</li>
-    <li><b>Fühler Gefrierfach</b> mittig zwischen das Gefriergut, frei und nicht direkt vor dem Lüfter oder an der Wand.</li>
+    <li><b>Anzeige und ESP32</b> mit Klettband außen an die Seite oder oben auf den Kühlschrank. Nicht hinten auf die Metallrückwand: Dort wird es warm und das WLAN ist schwach.</li>
+    <li>Den <b>Fühler für das Kühlteil</b> im mittleren Fach platzieren, möglichst zwischen Vorderkante und Mitte. Nicht an die Rückwand legen, die ist beim Kühlen eiskalt und verfälscht den Wert.</li>
+    <li>Den <b>Fühler für das Gefrierfach</b> mittig zwischen dem Gefriergut platzieren, ohne ihn vollständig zu bedecken, und nicht direkt vor dem Lüfter oder an der Wand.</li>
     <li><b>Innen</b> das Kabel hinter die Kante eines Fachs oder Türfachs klemmen. Klebeband hält auf kalten, feuchten Innenwänden schlecht.</li>
     <li><b>Außen mit Klebeband sichern</b>, siehe unten.</li>
   </ol>
@@ -504,7 +504,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <!-- ============================================================ DOOR -->
 <section class="step" id="tuer">
   <h2>Kabel durch die Tür</h2>
-  <p><b>Das ist der übliche Weg.</b> Das Fühlerkabel ist rund und etwa 4 mm dick. Die weiche Magnetdichtung legt sich darum. Es kommt auf die Stelle an und auf eine kurze Kontrolle danach.</p>
+  <p><b>Das ist der übliche Weg.</b> Das Fühlerkabel ist rund und etwa 4 mm dick. Die weiche Magnetdichtung schmiegt sich um das Kabel. Wichtig sind die richtige Stelle und eine anschließende Kontrolle.</p>
 
   <figure class="figure">
     <svg viewBox="0 0 640 270" role="img" aria-labelledby="f8t">
@@ -549,7 +549,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <li>Das Kabel <b>auf das Gehäuse</b> kleben (die Seitenwand), 5–10 cm hinter der Dichtung. <b>Nicht auf die Tür und nicht auf die Dichtung:</b> Die Tür bewegt sich, und Klebereste auf der Dichtung machen sie undicht.</li>
     <li>Zwischen Dichtung und Klebeband <b>etwas Spiel lassen</b>, damit die Tür das Kabel beim Öffnen nicht strafft.</li>
     <li>Noch ein Stück Band kurz vor der Elektronik, damit das Gewicht des Kabels nicht an den Steckkabeln hängt.</li>
-    <li>Malerkrepp oder Gewebeband geht gut. Auf lackierten Flächen lässt sich Malerkrepp später rückstandsfrei abziehen.</li>
+    <li>Malerkrepp oder Gewebeband eignet sich gut. Auf lackierten Flächen lässt sich Malerkrepp später rückstandsfrei abziehen.</li>
   </ul>
 
   <h3>Ummantelung an der Durchführung entfernen?</h3>
@@ -558,7 +558,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
     <div class="choice"><h3>Erst ohne probieren</h3><p>Bei den meisten Kühlschränken reicht das runde Kabel. Wenn der Papiertest klappt und nach ein paar Tagen kein Reif am Kabel ist, bleibt der Mantel dran.</p></div>
     <div class="choice"><h3>Nur wenn es nicht dicht wird</h3><p>Erst dann den Mantel an der Durchgangsstelle entfernen. Das macht am besten ein Erwachsener, siehe unten.</p></div>
   </div>
-  <div class="note warn"><b class="lab">Wenn Mantel ab, dann so</b>
+  <div class="note warn"><b class="lab">So entfernst du die Ummantelung</b>
     <ul class="do">
       <li>Nur ein kurzes Stück, etwa <b>6–8 cm</b>, genau da, wo das Kabel in der Dichtung liegt.</li>
       <li>Mit einer <b>Abisolierzange</b> oder einem Abmantler arbeiten. Mit dem Cuttermesser nur <b>längs</b> und ganz flach einritzen, nie rundherum schneiden. Ein Schnitt in eine Ader macht den Fühler kaputt.</li>
@@ -567,7 +567,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       <li>Die dünnen Adern sind empfindlicher. Hier ist das Klebeband außen besonders wichtig, damit kein Zug darauf kommt.</li>
     </ul>
   </div>
-  <div class="note warn"><b class="lab">Gefrierfach</b><p>Hier ist ein kleiner Spalt schneller ein Problem, weil sich Eis aufbaut. Den Papiertest beim Gefrierfach besonders sorgfältig machen und in der ersten Woche auf Reif an der Kabelstelle achten.</p></div>
+  <div class="note warn"><b class="lab">Gefrierfach</b><p>Hier kann schon ein kleiner Spalt zum Problem werden, weil sich Eis aufbaut. Den Papiertest beim Gefrierfach besonders sorgfältig machen und in der ersten Woche auf Reif an der Kabelstelle achten.</p></div>
   <div class="note tip"><b class="lab">Nicht bohren</b><p>Löcher in Gehäuse oder Tür sind keine gute Idee. In den Wänden liegen Kältemittelleitungen. Die Dichtung ist die richtige Stelle.</p></div>
 </section>
 
@@ -575,13 +575,13 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 <section class="step" id="hilfe">
   <h2>Wenn etwas nicht klappt</h2>
   <div class="trouble">
-    <div><b>Anzeige bleibt dunkel</b><p>Anzeige-Kabel prüfen: VCC an 3V3, GND an GND (links), DIO an D23, CLK an D18. Ist die Firmware drauf? Ohne Firmware bleibt die Anzeige dunkel.</p></div>
+    <div><b>Anzeige bleibt dunkel</b><p>Anzeige-Kabel prüfen: VCC an 3V3, GND an GND (links), DIO an D23, CLK an D18. Ist die Firmware installiert? Ohne Firmware bleibt die Anzeige dunkel.</p></div>
     <div><b>Anzeige zeigt <code>----</code></b><p>Der Fühler liefert keine Werte. Prüfen: Adapter-VCC an <b>RX2</b>, DAT an <b>D4</b>, GND an GND, und die Drähte sitzen fest in den Klemmen. Die Webseite zeigt „Fühler nicht gefunden“.</p></div>
-    <div><b>Nur ein Fühler erscheint</b><p>Ein Draht des zweiten Fühlers sitzt nicht richtig in der Klemme. Alle drei Klemmen nachziehen. Der ESP sucht alle 30 Sekunden neu.</p></div>
-    <div><b>WLAN „Kuehlschrank“ fehlt</b><p>USB-Kabel und Ladegerät prüfen. Leuchtet die rote LED auf dem ESP? Kurz die Taste EN drücken.</p></div>
+    <div><b>Nur ein Fühler erscheint</b><p>Ein Draht des zweiten Fühlers sitzt nicht richtig in der Klemme. Alle drei Klemmen nachziehen. Der ESP32 sucht alle 30 Sekunden erneut nach den Fühlern.</p></div>
+    <div><b>WLAN „Kuehlschrank“ fehlt</b><p>USB-Kabel und Ladegerät prüfen. Leuchtet die rote LED auf dem ESP32? Kurz die Taste EN drücken.</p></div>
     <div><b>Seite öffnet sich nicht</b><p>Im Browser von Hand <code>192.168.4.1</code> eingeben. Mobile Daten am Handy kurz ausschalten, falls das Handy die Seite übers Mobilnetz sucht.</p></div>
     <div><b>Adresse vergessen</b><p>Die Taste <b>BOOT</b> kurz drücken. Die Anzeige zeigt die Adresse noch einmal (<code>AP</code> = Hotspot, <code>IP</code> = Heim-WLAN).</p></div>
-    <div><b>Passwort vergessen oder alles neu</b><p><b>Werksreset:</b> Die Taste <b>BOOT</b> 10 Sekunden gedrückt halten. Die Anzeige zählt <code>rES7</code> bis <code>rES1</code> herunter, dann startet der ESP neu. Danach gilt wieder WLAN „Kuehlschrank“ mit Passwort „kuehlschrank“. Früher loslassen bricht ab.</p></div>
+    <div><b>Passwort vergessen oder neu einrichten</b><p><b>Werksreset:</b> Die Taste <b>BOOT</b> 10 Sekunden gedrückt halten. Die Anzeige zählt <code>rES7</code> bis <code>rES1</code> herunter, dann startet der ESP32 neu. Danach gilt wieder WLAN „Kuehlschrank“ mit Passwort „kuehlschrank“. Früher loslassen bricht ab.</p></div>
     <div><b>Verlauf ist leer</b><p>Nach einem Stromausfall beginnt der Verlauf neu. Er füllt sich mit einem Wert pro Minute.</p></div>
   </div>
 </section>
