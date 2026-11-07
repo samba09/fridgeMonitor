@@ -315,6 +315,12 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td>right, second to last pin</td></tr>
     </tbody>
   </table></div>
+  <div class="note tip"><b class="lab">Why does the probe power come from RX2?</b>
+    <p><b>RX2 is just a name.</b> Behind it is the ordinary pin GPIO 16. It is called that because it <i>can</i> serve as the receive line of a serial port. The firmware uses it as an output instead and switches it on. Then it carries 3.3 V, just like the 3V3 pin.</p>
+    <p><b>An output as a power source?</b> Yes, for small currents. An ESP32 pin easily delivers 20 mA. Both probes together need only 2–3 mA. It is not enough for the display, which draws up to 80 mA and therefore sits on the real 3V3 pin. There is only one of those, and each pin takes only one wire.</p>
+    <p><b>Bonus:</b> since the ESP switches the probe power itself, it can turn stuck probes off and on again. It does this automatically when it finds no probe three times in a row.</p>
+  </div>
+  <div class="note warn"><b class="lab">Don't mix up</b><p><span class="pin">RX0</span> and <span class="pin">TX0</span> (right, 3rd and 4th pin) belong to the USB connection. Don't connect anything there.</p></div>
   <label class="done"><input type="checkbox" id="c2" data-step> Adapter board is on the ESP</label>
 </section>
 
