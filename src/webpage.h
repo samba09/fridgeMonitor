@@ -42,6 +42,7 @@ td{padding:3px 0;vertical-align:top}td:first-child{color:var(--mut);width:45%}
 <body>
 <main>
 <h1>Kühlschrank</h1>
+<div id="nosensor" class="card" hidden><b>Keine Fühler gefunden.</b><p class="mut">Verkabelung prüfen: Fühler-VCC an RX2 (GPIO 16), DAT an D4, GND an GND. Die Suche läuft alle 30 Sekunden.</p></div>
 <div id="sensors"></div>
 
 <div class="card">
@@ -54,7 +55,7 @@ td{padding:3px 0;vertical-align:top}td:first-child{color:var(--mut);width:45%}
 <label for="bright">Helligkeit Anzeige</label>
 <input id="bright" type="range" min="0" max="7">
 <button onclick="saveSettings()">Speichern</button>
-<button class="sec" onclick="post('/api/swap').then(refreshAll)">Fühler 1 ⇄ 2 tauschen</button>
+<button class="sec" onclick="swap()">Fühler 1 ⇄ 2 tauschen</button>
 <div class="msg" id="setmsg"></div>
 <p class="mut">Neue oder getauschte Fühler werden automatisch erkannt. Ein ersetzter Fühler übernimmt den Platz des fehlenden.</p>
 <button class="sec" onclick="forget(0)">Fühler 1 entfernen</button>
@@ -111,9 +112,10 @@ let state=null,hist=null,formFilled=false;
 function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 function fmt(t,d=1){return t==null?'–':t.toFixed(d).replace('.',',')+' °C'}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+// Every POST carries X-FM: 1; the ESP rejects requests without it (blocks other web pages).
 function post(url,data){
   const body=new URLSearchParams(data||{});
-  return fetch(url,{method:'POST',body}).then(r=>r.json());
+  return fetch(url,{method:'POST',body,headers:{'X-FM':'1'}}).then(r=>r.json());
 }
 
 function render(){
@@ -133,11 +135,9 @@ function render(){
     el.querySelector('.temp').textContent=fmt(s.t);
     renderHistory(i,el);
   });
-  if(!state.sensors.some(s=>s.configured)){
-    box.innerHTML='<div class="card"><b>Keine Fühler gefunden.</b><p class="mut">Verkabelung prüfen: VCC → GPIO16, GND → GND, DAT → GPIO4.</p></div>';
-  }
+  $('nosensor').hidden=state.sensors.some(s=>s.configured);
   if(!formFilled){
-    $('name0').value=state.sensors[0].name;$('name1').value=state.sensors[1].name;$('bright').value=state.bright;
+    fillNames();$('bright').value=state.bright;
     $('ssid').value=state.sta.ssid;$('apauto').checked=state.ap.auto;formFilled=true;
   }
   const st=state.sta;
@@ -191,24 +191,29 @@ function drawChart(cv,raw,color){
   }
   g.strokeStyle=color;g.lineWidth=2;g.lineJoin='round';g.beginPath();
   let pen=false;
-  raw.forEach((v,k)=>{if(v==null){pen=false;return}const px=x(k),py=y(v/10);pen?g.lineTo(px,py):g.moveTo(px,py);pen=true;});
+  const lone=[];
+  raw.forEach((v,k)=>{if(v==null){pen=false;return}const px=x(k),py=y(v/10);
+    if(pen)g.lineTo(px,py);else{g.moveTo(px,py);if(raw[k+1]==null)lone.push([px,py]);}pen=true;});
   g.stroke();
+  g.fillStyle=color;lone.forEach(([px,py])=>{g.beginPath();g.arc(px,py,2,0,2*Math.PI);g.fill();});
 }
 
 function loadState(){return fetch('/api/state').then(r=>r.json()).then(s=>{state=s;render()}).catch(()=>{})}
 function loadHist(){return fetch('/api/history').then(r=>r.json()).then(h=>{hist=h;render()}).catch(()=>{})}
-function refreshAll(){formFilled=false;return loadState().then(loadHist)}
+function refreshAll(){return loadState().then(loadHist)}
+function fillNames(){if(!state)return;$('name0').value=state.sensors[0].name;$('name1').value=state.sensors[1].name}
+function fail(id){return ()=>{$(id).textContent='Keine Verbindung zum Gerät. Bitte erneut versuchen.'}}
 
 function saveSettings(){
   post('/api/settings',{name0:$('name0').value,name1:$('name1').value,bright:$('bright').value})
-    .then(()=>{$('setmsg').textContent='Gespeichert.';refreshAll()})
-    .catch(()=>$('setmsg').textContent='Fehler beim Speichern.');
+    .then(j=>{$('setmsg').textContent=j.ok?'Gespeichert.':(j.error||'Fehler beim Speichern.');refreshAll()})
+    .catch(fail('setmsg'));
 }
 function saveAp(){
   const pw=$('appass').value;
   if(pw&&(pw.length<8||pw.length>63)){$('apmsg').textContent='Das Passwort muss 8 bis 63 Zeichen lang sein.';return}
   const data={apauto:$('apauto').checked?'1':'0'};if(pw)data.appass=pw;
-  fetch('/api/settings',{method:'POST',body:new URLSearchParams(data)}).then(r=>r.json()).then(j=>{
+  post('/api/settings',data).then(j=>{
     if(!j.ok){$('apmsg').textContent=j.error||'Fehler beim Speichern.';return}
     $('appass').value='';
     $('apmsg').textContent=pw?'Gespeichert. Der Hotspot startet neu: Handy mit dem neuen Passwort wieder verbinden.':'Gespeichert.';
@@ -222,20 +227,26 @@ function factoryReset(){
 }
 function forget(i){
   if(!confirm('Fühler '+(i+1)+' entfernen? Der Verlauf dieses Fühlers wird gelöscht.'))return;
-  post('/api/forget',{slot:i}).then(refreshAll);
+  post('/api/forget',{slot:i}).then(()=>refreshAll()).then(fillNames).catch(fail('setmsg'));
 }
+function swap(){post('/api/swap').then(()=>refreshAll()).then(fillNames).catch(fail('setmsg'))}
 function saveWifi(){
-  $('wifimsg').textContent=$('ssid').value?'Gespeichert, verbinde … Die Anzeige zeigt danach die neue Adresse (IP). Erreichbar auch unter http://kuehlschrank.local/':'Heim-WLAN getrennt.';
-  post('/api/wifi',{ssid:$('ssid').value,pass:$('pass').value}).then(()=>setTimeout(loadState,8000));
+  const joining=!!$('ssid').value;
+  post('/api/wifi',{ssid:$('ssid').value,pass:$('pass').value}).then(j=>{
+    if(!j.ok){$('wifimsg').textContent=j.error||'Fehler beim Speichern.';return}
+    $('wifimsg').textContent=joining?'Gespeichert, verbinde … Dabei wechselt der Hotspot den Funkkanal: Das Handy verliert kurz die Verbindung und muss sich eventuell neu verbinden. Die Anzeige zeigt danach die neue Adresse (IP), erreichbar auch unter http://kuehlschrank.local/':'Heim-WLAN getrennt.';
+    setTimeout(loadState,8000);
+  }).catch(fail('wifimsg'));
 }
 function scan(){
   $('wifimsg').textContent='Suche Netze …';
+  let tries=0;
   const poll=()=>fetch('/api/scan').then(r=>r.json()).then(j=>{
-    if(j.busy){setTimeout(poll,1500);return}
+    if(j.busy){if(++tries<20)setTimeout(poll,1500);else $('wifimsg').textContent='Suche dauert zu lange. Bitte später erneut versuchen.';return}
     const sel=$('nets');sel.innerHTML='<option value="">– Netz auswählen –</option>';
     j.nets.sort((a,b)=>b.rssi-a.rssi).forEach(n=>{const o=document.createElement('option');o.value=n.ssid;o.textContent=n.ssid+' ('+n.rssi+' dBm)';sel.appendChild(o)});
     $('wifimsg').textContent=j.nets.length+' Netz(e) gefunden.';
-  });
+  }).catch(fail('wifimsg'));
   poll();
 }
 function upload(){
@@ -245,7 +256,7 @@ function upload(){
   xhr.upload.onprogress=e=>{if(e.lengthComputable)$('fwmsg').textContent='Hochladen … '+Math.round(e.loaded/e.total*100)+' %'};
   xhr.onload=()=>{$('fwmsg').textContent=xhr.status==200?'Fertig. Das Gerät startet neu, Seite in 15 s neu laden.':'Fehler: '+xhr.responseText};
   xhr.onerror=()=>{$('fwmsg').textContent='Upload fehlgeschlagen.'};
-  xhr.open('POST','/update');xhr.send(fd);
+  xhr.open('POST','/update');xhr.setRequestHeader('X-FM','1');xhr.send(fd);
 }
 
 // Send the phone's clock so the history shows real times even without internet.

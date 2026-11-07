@@ -1,8 +1,9 @@
 // Kühlschrank-Monitor
 //
 // ESP32 + 2x DS18B20 + TM1637 4-digit display.
-// - Own WiFi hotspot "Kuehlschrank" (always on) with web page at http://192.168.4.1
-// - Optional: additionally joins the home WiFi (configured on the web page)
+// - Own WiFi hotspot "Kuehlschrank" with web page at http://192.168.4.1 (for setup,
+//   optionally off while the home WiFi works)
+// - Optional: joins the home WiFi (configured on the web page)
 // - Display alternates between the two probes (whole degrees)
 // - History: 1 value per minute and probe, 24 h, kept in RAM
 // - Firmware update via web page
@@ -20,6 +21,8 @@
 #include <Update.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <esp_task_wdt.h>
+#include <esp_timer.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -50,6 +53,9 @@ constexpr uint32_t AP_OFF_DELAY_MS = 60UL * 1000;        // home WiFi stable thi
 constexpr uint32_t AP_FORCE_OFF_MS = 10UL * 60 * 1000;   // ... even if a phone is still connected
 constexpr uint32_t AP_FALLBACK_MS = 2UL * 60 * 1000;     // home WiFi gone this long -> hotspot back on
 constexpr uint32_t RESET_HOLD_MS = 10UL * 1000;          // hold BOOT this long for factory reset
+constexpr uint32_t PROBE_STUCK_MS = 3UL * 60 * 1000;     // probe found but no valid reading -> power-cycle
+constexpr uint32_t PROBE_CYCLE_MIN_MS = 5UL * 60 * 1000; // at most one power-cycle per 5 min
+constexpr int WDT_TIMEOUT_S = 30;                        // restart if loop() hangs this long
 
 static const char *AP_SSID = "Kuehlschrank";
 static const char *AP_PASS_DEFAULT = "kuehlschrank";  // min. 8 characters
@@ -89,6 +95,7 @@ bool apActive = false;
 bool staWasConnected = false;
 uint32_t staLastTryMs = 0;
 uint32_t staChangeMs = 0;  // last change of the home WiFi connection state
+uint32_t apOnSinceMs = 0;  // hotspot switched on, or its settings changed
 bool buttonOverride = false;  // display is showing the factory reset countdown
 
 bool conversionPending = false;
@@ -96,6 +103,8 @@ uint32_t conversionStartMs = 0;
 uint32_t lastReadMs = 0;
 uint32_t lastRescanMs = 0;
 uint8_t emptyScans = 0;
+uint32_t lastPowerCycleMs = 0;
+bool uploadRejected = false;
 
 // display
 uint8_t frameIndex = 0;
@@ -132,9 +141,15 @@ String jsonEscape(const String &s) {
   return out;
 }
 
+// Trim and limit to 48 bytes (24 characters in the form, umlauts take 2 bytes)
+// without cutting a UTF-8 character in half.
 String cleanName(String s) {
   s.trim();
-  if (s.length() > 24) s = s.substring(0, 24);
+  if (s.length() > 48) {
+    size_t n = 48;
+    while (n > 0 && ((uint8_t)s[n] & 0xC0) == 0x80) n--;
+    s = s.substring(0, n);
+  }
   return s;
 }
 
@@ -191,6 +206,7 @@ void sensorPowerCycle() {
   delay(500);
   digitalWrite(PIN_SENSOR_PWR, HIGH);
   delay(50);
+  lastPowerCycleMs = millis();
 }
 
 void scanBus() {
@@ -295,11 +311,29 @@ void handleSensors() {
     conversionStartMs = now;
   }
 
-  if (now - lastSampleMs >= SAMPLE_INTERVAL_MS) {
-    lastSampleMs += SAMPLE_INTERVAL_MS;
-    if (now - lastSampleMs >= SAMPLE_INTERVAL_MS) lastSampleMs = now;  // don't catch up after stalls
-    pushHistory();
+  // A probe that answers on the bus but delivers no valid readings (e.g. stuck at 85 °C
+  // after a brown-out): switch the probe power off and on.
+  if (!conversionPending && now - lastPowerCycleMs > PROBE_CYCLE_MIN_MS) {
+    for (int i = 0; i < NSLOTS; i++) {
+      const Slot &s = slots[i];
+      uint32_t since = now - (s.lastOkMs > lastPowerCycleMs ? s.lastOkMs : lastPowerCycleMs);
+      if (s.present && since > PROBE_STUCK_MS) {
+        Serial.printf("Fuehler %d liefert keine Werte, Fuehler-Strom aus/an\n", i + 1);
+        sensorPowerCycle();
+        break;
+      }
+    }
   }
+
+  // One history value per minute; minutes missed during a stall are stored as gaps
+  // so that the time axis stays correct.
+  int pushes = 0;
+  while (now - lastSampleMs >= SAMPLE_INTERVAL_MS && pushes < HIST_LEN) {
+    lastSampleMs += SAMPLE_INTERVAL_MS;
+    pushHistory();  // the first push uses this minute's readings, further ones are gaps
+    pushes++;
+  }
+  if (now - lastSampleMs >= SAMPLE_INTERVAL_MS) lastSampleMs = now;
 }
 
 // ---------------------------------------------------------------- display
@@ -343,6 +377,15 @@ void formatNumberRight(int n, uint8_t out[4]) {
 
 void startIpDisplay() {
   bool sta = WiFi.status() == WL_CONNECTED;
+  if (!sta && !apActive) {  // home WiFi lost, hotspot not back yet: no address
+    const uint8_t noIp[4] = {seg::I, seg::P, seg::MINUS, seg::MINUS};
+    memcpy(ipFrames[0], noIp, 4);
+    ipFrameCount = 1;
+    ipFramePos = 0;
+    frameStartMs = millis();
+    display.show(ipFrames[0]);
+    return;
+  }
   IPAddress ip = sta ? WiFi.localIP() : WiFi.softAPIP();
   uint8_t head[4] = {seg::I, seg::P, seg::BLANK, seg::BLANK};
   if (!sta) {  // "AP" = own hotspot address
@@ -447,6 +490,7 @@ void apStart() {
   WiFi.softAP(AP_SSID, apPass.c_str());
   dns.start(53, "*", WiFi.softAPIP());
   apActive = true;
+  apOnSinceMs = millis();
   Serial.printf("Hotspot \"%s\" an, Seite: http://%s/\n", AP_SSID, WiFi.softAPIP().toString().c_str());
 }
 
@@ -474,7 +518,11 @@ void handleWifi() {
   if (!apAuto || staSsid.length() == 0) {
     want = true;
   } else if (connected) {
-    uint32_t up = now - staChangeMs;
+    // Count from the later of "home WiFi connected" and "hotspot (re)started / settings
+    // changed", so a phone gets time to (re)join after a password change.
+    uint32_t staUp = now - staChangeMs;
+    uint32_t apUp = now - apOnSinceMs;
+    uint32_t up = staUp < apUp ? staUp : apUp;
     bool phoneOnHotspot = apActive && WiFi.softAPgetStationNum() > 0;
     want = apActive && (up < AP_OFF_DELAY_MS || (phoneOnHotspot && up < AP_FORCE_OFF_MS));
   } else {
@@ -496,6 +544,28 @@ void sendJson(const String &body, int code = 200) {
   server.send(code, "application/json", body);
 }
 
+// Every POST must carry the header "X-FM: 1". Browsers only send custom headers
+// cross-origin after a CORS preflight, which this server never answers, so other
+// web pages cannot trigger actions. The Host check blocks DNS rebinding.
+bool requestAllowed() {
+  String host = server.hostHeader();
+  int colon = host.indexOf(':');
+  if (colon >= 0) host = host.substring(0, colon);
+  host.toLowerCase();
+  bool hostOk = host == WiFi.softAPIP().toString() || host == WiFi.localIP().toString() || host == HOSTNAME;
+  // Names the home router may give the device, e.g. kuehlschrank.fritz.box
+  static const char *suffixes[] = {".local", ".fritz.box", ".lan", ".home", ".home.arpa", ".box", ".speedport.ip"};
+  for (const char *suf : suffixes)
+    if (host == String(HOSTNAME) + suf) hostOk = true;
+  return hostOk && server.header("X-FM") == "1";
+}
+
+bool checkRequest() {
+  if (requestAllowed()) return true;
+  sendJson("{\"ok\":false,\"error\":\"Anfrage abgelehnt\"}", 403);
+  return false;
+}
+
 void handleState() {
   bool sta = WiFi.status() == WL_CONNECTED;
   String j;
@@ -503,7 +573,7 @@ void handleState() {
   j += "{\"fw\":\"";
   j += FW_VERSION;
   j += "\",\"up\":";
-  j += millis() / 1000;
+  j += (uint32_t)(esp_timer_get_time() / 1000000ULL);
   j += ",\"epoch\":";
   j += timeValid() ? (uint32_t)time(nullptr) : 0;
   j += ",\"bright\":";
@@ -586,6 +656,14 @@ void handleHistory() {
 }
 
 void handleSettings() {
+  if (!checkRequest()) return;
+  if (server.hasArg("appass") && server.arg("appass").length() > 0) {
+    size_t len = server.arg("appass").length();
+    if (len < 8 || len > 63) {
+      sendJson("{\"ok\":false,\"error\":\"Das Hotspot-Passwort muss 8 bis 63 Zeichen lang sein.\"}", 400);
+      return;
+    }
+  }
   for (int i = 0; i < NSLOTS; i++) {
     String key = "name" + String(i);
     if (server.hasArg(key)) {
@@ -600,16 +678,14 @@ void handleSettings() {
     frameStartMs = 0;  // apply now
   }
   if (server.hasArg("apauto")) {
-    apAuto = server.arg("apauto") == "1";
+    bool v = server.arg("apauto") == "1";
+    if (v != apAuto) apOnSinceMs = millis();  // give phones the full delay again
+    apAuto = v;
     prefs.putBool("apauto", apAuto);
   }
   bool newPass = false;
   if (server.hasArg("appass") && server.arg("appass").length() > 0) {
     String p = server.arg("appass");
-    if (p.length() < 8 || p.length() > 63) {
-      sendJson("{\"ok\":false,\"error\":\"Das Hotspot-Passwort muss 8 bis 63 Zeichen lang sein.\"}", 400);
-      return;
-    }
     newPass = p != apPass;
     apPass = p;
     prefs.putString("appass", apPass);
@@ -623,12 +699,14 @@ void handleSettings() {
 }
 
 void handleFactoryReset() {
+  if (!checkRequest()) return;
   sendJson("{\"ok\":true}");
   delay(300);
   factoryReset();
 }
 
 void handleSwap() {
+  if (!checkRequest()) return;
   Slot tmp = slots[0];
   slots[0] = slots[1];
   slots[1] = tmp;
@@ -643,8 +721,9 @@ void handleSwap() {
 }
 
 void handleForget() {
-  int i = server.arg("slot").toInt();
-  if (i < 0 || i >= NSLOTS) {
+  if (!checkRequest()) return;
+  int i = server.hasArg("slot") ? server.arg("slot").toInt() : -1;
+  if (!server.hasArg("slot") || i < 0 || i >= NSLOTS) {
     sendJson("{\"ok\":false}", 400);
     return;
   }
@@ -656,9 +735,20 @@ void handleForget() {
 }
 
 void handleWifiSave() {
-  staSsid = server.arg("ssid");
-  staSsid.trim();
-  staPass = server.arg("pass");
+  if (!checkRequest()) return;
+  String ssid = server.arg("ssid");
+  ssid.trim();
+  String pass = server.arg("pass");
+  if (ssid.length() > 32) {
+    sendJson("{\"ok\":false,\"error\":\"Der WLAN-Name ist zu lang (max. 32 Zeichen).\"}", 400);
+    return;
+  }
+  if (ssid.length() > 0 && pass.length() > 0 && (pass.length() < 8 || pass.length() > 63)) {
+    sendJson("{\"ok\":false,\"error\":\"Das WLAN-Passwort muss 8 bis 63 Zeichen lang sein.\"}", 400);
+    return;
+  }
+  staSsid = ssid;
+  staPass = pass;
   prefs.putString("ssid", staSsid);
   prefs.putString("pass", staPass);
   sendJson("{\"ok\":true}");
@@ -692,6 +782,7 @@ void handleWifiScan() {
 }
 
 void handleSetTime() {
+  if (!checkRequest()) return;
   // The browser sends its clock so the history has real times even without internet.
   uint32_t t = strtoul(server.arg("t").c_str(), nullptr, 10);
   if (t > 1700000000UL) {
@@ -705,9 +796,14 @@ void handleSetTime() {
 }
 
 void handleUpdateDone() {
-  bool ok = !Update.hasError();
+  if (uploadRejected) {
+    uploadRejected = false;
+    server.send(403, "text/plain", "Anfrage abgelehnt");
+    return;
+  }
+  bool ok = !Update.hasError() && Update.isFinished();
   server.sendHeader("Connection", "close");
-  server.send(ok ? 200 : 500, "text/plain", ok ? "OK" : Update.errorString());
+  server.send(ok ? 200 : 500, "text/plain", ok ? "OK" : (Update.hasError() ? Update.errorString() : "Upload unvollstaendig"));
   if (ok) {
     delay(500);
     ESP.restart();
@@ -715,15 +811,24 @@ void handleUpdateDone() {
 }
 
 void handleUpdateUpload() {
+  esp_task_wdt_reset();  // a long upload is not a hang
   HTTPUpload &up = server.upload();
   if (up.status == UPLOAD_FILE_START) {
+    uploadRejected = !requestAllowed();
+    if (uploadRejected) return;
     Serial.printf("Update: %s\n", up.filename.c_str());
-    Update.begin(UPDATE_SIZE_UNKNOWN);
+    if (!Update.begin(UPDATE_SIZE_UNKNOWN)) Serial.printf("Update-Fehler: %s\n", Update.errorString());
+  } else if (uploadRejected || Update.hasError()) {
+    if (up.status == UPLOAD_FILE_ABORTED && Update.isRunning()) Update.abort();
+    return;  // ignore the rest of a rejected or failed upload
   } else if (up.status == UPLOAD_FILE_WRITE) {
-    Update.write(up.buf, up.currentSize);
+    if (Update.write(up.buf, up.currentSize) != up.currentSize) {
+      Serial.printf("Update-Fehler: %s\n", Update.errorString());
+      Update.abort();
+    }
   } else if (up.status == UPLOAD_FILE_END) {
-    Update.end(true);
-    Serial.printf("Update fertig: %u Bytes\n", up.totalSize);
+    if (Update.end(true)) Serial.printf("Update fertig: %u Bytes\n", up.totalSize);
+    else Serial.printf("Update-Fehler: %s\n", Update.errorString());
   } else if (up.status == UPLOAD_FILE_ABORTED) {
     Update.abort();
   }
@@ -757,12 +862,17 @@ void setupWeb() {
   server.on("/api/reset", HTTP_POST, handleFactoryReset);
   server.on("/update", HTTP_POST, handleUpdateDone, handleUpdateUpload);
   server.onNotFound(handleNotFound);
+  const char *headerKeys[] = {"X-FM"};
+  server.collectHeaders(headerKeys, 1);
   server.begin();
 }
 
 // ---------------------------------------------------------------- setup/loop
 void setup() {
   Serial.begin(115200);
+  // Watchdog for the loop task: restarts the ESP if loop() hangs (e.g. a stalled upload).
+  esp_task_wdt_init(WDT_TIMEOUT_S, true);
+  esp_task_wdt_add(NULL);
   Serial.printf("\nKuehlschrank-Monitor %s\n", FW_VERSION);
 
   setenv("TZ", TZ_INFO, 1);
@@ -785,6 +895,7 @@ void setup() {
   dallas.setWaitForConversion(false);
   scanBus();
   lastSampleMs = millis();
+  lastPowerCycleMs = millis();
 
   WiFi.persistent(false);
   WiFi.setHostname(HOSTNAME);
@@ -800,7 +911,8 @@ void setup() {
 }
 
 void loop() {
-  dns.processNextRequest();
+  esp_task_wdt_reset();
+  if (apActive) dns.processNextRequest();
   server.handleClient();
   handleSensors();
   handleWifi();
