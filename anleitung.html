@@ -1,0 +1,708 @@
+<title>Kühlschrank-Monitor Bauanleitung</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column of numbered build steps; each step = text + a wiring drawing, with a tick-off box. Wire colours are real wire colours. */
+:root{
+  --bg:#eef3f6;
+  --paper:#ffffff;
+  --ink:#14212b;
+  --muted:#566673;
+  --rule:#d3dde4;
+  --accent:#0a7c86;
+  --accent-soft:#d8eef0;
+  --warn:#b4471a;
+  --warn-soft:#fbe9e1;
+  --ok:#2f7d3a;
+  --pcb:#1f5fa8;
+  --pcb-dark:#16467d;
+  --board:#17191c;
+  --board-edge:#000000;
+  --silk:#f2f2f2;
+  --metal:#b7c0c7;
+  --gold:#d9b25a;
+  --w-red:#d23a2f;
+  --w-black:#1d2328;
+  --w-yellow:#e2b100;
+  --w-green:#2f9a4a;
+  --w-blue:#2f6fd6;
+  --w-orange:#e07a1f;
+  --wire-edge:rgba(20,33,43,.35);
+  --led-on:#ff3b2f;
+  --led-off:#3b1714;
+  --led-bg:#140908;
+  --font-display:"Bricolage Grotesque",system-ui,sans-serif;
+  --font-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1519;--paper:#152027;--ink:#e3edf2;--muted:#9aaab5;--rule:#2a3a44;
+  --accent:#45c2cc;--accent-soft:#163a3e;--warn:#ff9a6b;--warn-soft:#3a2219;--ok:#6cc779;
+  --pcb:#2c6fbd;--pcb-dark:#1d4f8a;--board-edge:#4a5258;--metal:#8f9aa2;
+  --w-black:#3a434a;--wire-edge:rgba(227,237,242,.45);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1519;--paper:#152027;--ink:#e3edf2;--muted:#9aaab5;--rule:#2a3a44;
+  --accent:#45c2cc;--accent-soft:#163a3e;--warn:#ff9a6b;--warn-soft:#3a2219;--ok:#6cc779;
+  --pcb:#2c6fbd;--pcb-dark:#1d4f8a;--board-edge:#4a5258;--metal:#8f9aa2;
+  --w-black:#3a434a;--wire-edge:rgba(227,237,242,.45);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 var(--font-body)}
+.wrap{max-width:820px;margin:0 auto;padding-block:28px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,6vw,46px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(22px,4vw,28px);font-weight:800}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:65ch}
+code{font-family:var(--font-mono);font-size:.88em}
+.pin{font-family:var(--font-mono);font-weight:700;font-size:.85em;background:var(--accent-soft);color:var(--ink);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.muted{color:var(--muted)}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+header.hero{display:grid;gap:14px;margin-bottom:28px}
+.eyebrow{font-family:var(--font-mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.lede{font-size:19px;color:var(--muted)}
+.heroDisplays{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.seg7{display:block;height:64px;width:auto;max-width:100%}
+
+.progress{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--rule)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--rule);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.progress span{font-family:var(--font-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 8px}
+nav.toc a{font-size:14px;text-decoration:none;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:99px;padding:5px 12px}
+
+section.step{display:grid;gap:14px;padding-block:30px;border-bottom:1px solid var(--rule)}
+.stephead{display:flex;gap:14px;align-items:flex-start}
+.num{flex:none;width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--font-display);font-weight:800;font-size:20px;display:grid;place-items:center}
+.stephead > div{min-width:0;display:grid;gap:4px}
+figure{margin:0}
+.figure{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:12px;overflow-x:auto}
+.figure > svg{display:block;width:100%;height:auto;min-width:540px}
+figcaption{font-size:14px;color:var(--muted);margin-top:8px}
+ol.do,ul.do{margin:0;padding-left:1.3em;display:grid;gap:6px;max-width:65ch}
+ol.do li::marker{font-weight:700;color:var(--accent)}
+
+table.map{border-collapse:collapse;width:100%;font-size:15px}
+table.map th,table.map td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.map th{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--rule);border-radius:14px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:-1px;box-shadow:0 0 0 1.5px var(--wire-edge)}
+
+.note{border-radius:12px;padding:12px 14px;display:grid;gap:6px;font-size:16px}
+.note.warn{background:var(--warn-soft);border-left:4px solid var(--warn)}
+.note.tip{background:var(--accent-soft);border-left:4px solid var(--accent)}
+.note b.lab{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+
+label.done{display:inline-flex;align-items:center;gap:10px;font-weight:700;cursor:pointer;user-select:none;width:fit-content;padding:8px 14px;border-radius:10px;border:1.5px solid var(--rule);background:var(--paper)}
+label.done input{width:20px;height:20px;accent-color:var(--ok)}
+label.done:has(input:checked){border-color:var(--ok);color:var(--ok)}
+
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.part{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:12px;display:grid;gap:2px}
+.part b{font-size:16px}
+.part span{font-size:14px;color:var(--muted)}
+
+.copyrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.copyrow code{background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;user-select:all;overflow-wrap:anywhere}
+button.copy{font:inherit;font-size:14px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two > *{min-width:0}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.choice{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.choice h3{font-size:17px}
+
+.trouble{display:grid;gap:10px}
+.trouble div{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:12px}
+.trouble div > *{min-width:0}
+@media (max-width:520px){.trouble div{grid-template-columns:1fr}}
+
+/* SVG theming */
+svg text{font-family:var(--font-body);fill:var(--ink)}
+svg .lbl{font-size:13px}
+svg .small{font-size:11px;fill:var(--muted)}
+svg .mono{font-family:var(--font-mono);font-weight:700;font-size:12px}
+svg .silk{font-family:var(--font-mono);font-weight:700;font-size:7.5px;fill:var(--silk)}
+svg .pcb{fill:var(--pcb);stroke:var(--pcb-dark);stroke-width:2}
+svg .pcbtext{fill:#fff;font-family:var(--font-mono);font-weight:700;font-size:10px}
+svg .board{fill:var(--board);stroke:var(--board-edge);stroke-width:1.5}
+svg .hole{fill:var(--bg);stroke:var(--gold);stroke-width:2}
+svg .pad{fill:var(--gold)}
+svg .padhole{fill:#2a2a2a}
+svg .can{fill:#c9cfd3;stroke:#8b949a;stroke-width:1}
+svg .chip{fill:#2a2f33;stroke:#454c52}
+svg .smd{fill:#d9d2c5}
+svg .usb{fill:#c4cbd0;stroke:#7d868c}
+svg .btn{fill:#c4cbd0;stroke:#7d868c}
+svg .btncap{fill:#2a2f33}
+svg .pinhead{fill:var(--metal)}
+svg .terminal{fill:#2f9a4a;stroke:#1f6b33;stroke-width:1.5}
+svg .screw{fill:#cfd6db;stroke:#7d8a93}
+svg .dupont{fill:#111;stroke:var(--wire-edge)}
+svg .edge{fill:none;stroke:var(--wire-edge);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+svg .w{fill:none;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+svg .red{stroke:var(--w-red)} svg .black{stroke:var(--w-black)} svg .yellow{stroke:var(--w-yellow)}
+svg .green{stroke:var(--w-green)} svg .blue{stroke:var(--w-blue)} svg .orange{stroke:var(--w-orange)}
+svg .faded{opacity:.28}
+svg .ring{fill:none;stroke-width:3}
+svg .probe{fill:#c3ccd2;stroke:#7d8a93;stroke-width:1.5}
+svg .cable{fill:none;stroke:#5b6670;stroke-width:7;stroke-linecap:round}
+svg .outline{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .inside{fill:var(--accent-soft);stroke:var(--ink);stroke-width:2}
+svg .gasket{fill:#8a949b;stroke:#5e676d;stroke-width:1.5}
+svg .door{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+svg .tape{fill:#e8d9a8;stroke:#b9a66b;stroke-width:1;opacity:.95}
+svg .arrow{fill:none;stroke:var(--accent);stroke-width:2}
+svg .arrowhead{fill:var(--accent)}
+svg .okmark{fill:var(--ok)}
+svg .shelf{stroke:var(--muted);stroke-width:2}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Bauanleitung · ohne Löten · ca. 45 Minuten</div>
+  <h1>Kühlschrank-Monitor</h1>
+  <p class="lede">Zwei Fühler messen Kühlschrank und Gefrierfach. Eine Anzeige außen zeigt abwechselnd beide Temperaturen. Über das eigene WLAN siehst du auf dem Handy den Verlauf der letzten 24 Stunden.</p>
+  <div class="heroDisplays">
+    <svg class="seg7" data-text="  4°" role="img" aria-label="Anzeige: 4 Grad"></svg>
+    <svg class="seg7" data-text="-18°" role="img" aria-label="Anzeige: minus 18 Grad"></svg>
+  </div>
+  <p class="muted" style="font-size:14px">So sieht die Anzeige aus. Ein echtes Gradzeichen hat sie nicht: Das kleine Quadrat oben rechts sind die vier oberen Segmente der letzten Ziffer. Der Doppelpunkt bleibt immer aus.</p>
+</header>
+
+<div class="progress" aria-live="polite"><div class="bar"><i id="barfill"></i></div><span id="bartext">0 von 7 Schritten</span></div>
+
+<nav class="toc" aria-label="Inhalt">
+  <a href="#teile">Teile</a><a href="#board">Das ESP32-Board</a><a href="#s1">1 Fühler</a><a href="#s2">2 Fühler → ESP</a><a href="#s3">3 Anzeige → ESP</a><a href="#s4">4 Prüfen</a><a href="#s5">5 Firmware</a><a href="#s6">6 Erster Start</a><a href="#s7">7 Einbauen</a><a href="#tuer">Kabel durch die Tür</a><a href="#hilfe">Hilfe</a>
+</nav>
+
+<!-- ============================================================ PARTS -->
+<section class="step" id="teile">
+  <h2>Was auf dem Tisch liegen sollte</h2>
+  <div class="parts">
+    <div class="part"><b>ESP32-Board</b><span>ELEGOO, schwarz, mit USB-C. Das zweite aus der Packung ist Ersatz.</span></div>
+    <div class="part"><b>2 Temperaturfühler</b><span>Metallhülse mit Kabel und drei Drähten am Ende</span></div>
+    <div class="part"><b>1 Adapterplatine</b><span>Aus dem Fühler-Set. Die zweite und der lose Widerstand bleiben übrig.</span></div>
+    <div class="part"><b>Anzeige (TM1637)</b><span>Blaue Platine mit 4 roten Ziffern und 4 Stiften an der Seite</span></div>
+    <div class="part"><b>7 Steckkabel Buchse–Buchse</b><span>Die Enden mit Loch. 3 davon sind schon beim Fühler-Set dabei.</span></div>
+    <div class="part"><b>USB-Ladegerät und Kabel</b><span>USB-A (rechteckig) auf USB-C</span></div>
+    <div class="part"><b>Kleiner Schraubendreher</b><span>Schlitz, 2–3 mm, für die Klemmen</span></div>
+    <div class="part"><b>Klebeband und Klettstreifen</b><span>Malerkrepp oder Gewebeband für die Kabel, Klett für den ESP</span></div>
+  </div>
+  <div class="note tip"><b class="lab">Tipp</b><p>Stecke das USB-Kabel erst in Schritt 5 ein. Solange Strom fließt, wird nichts umgesteckt.</p></div>
+</section>
+
+<!-- ============================================================ BOARD -->
+<section class="step" id="board">
+  <h2>Das ESP32-Board kennenlernen</h2>
+  <p>So sieht dein Board von oben aus: Antenne oben, USB-C unten. Neben jedem Stift steht seine Bezeichnung. Du brauchst nur die farbig markierten. Fast alle sitzen auf der <b>rechten Seite</b>.</p>
+  <figure class="figure">
+    <svg id="boardfig" viewBox="0 0 560 420" role="img" aria-labelledby="bft">
+      <title id="bft">ESP32 DevKit mit 30 Stiften von oben, Antenne oben, USB-C unten. Markiert: rechts D23, D18, RX2, D4, GND, 3V3 und links GND.</title>
+      <g id="boardA" transform="translate(190,40)"></g>
+      <g class="lbl">
+        <text x="440" y="112">Anzeige DIO</text>
+        <text x="440" y="203">Anzeige CLK</text>
+        <text x="440" y="249">Fühler VCC (= GPIO 16)</text>
+        <text x="440" y="264">Fühler DAT</text>
+        <text x="440" y="310">Fühler GND</text>
+        <text x="440" y="325">Anzeige VCC</text>
+        <text x="20" y="310">Anzeige GND</text>
+      </g>
+    </svg>
+    <figcaption>Nachgezeichnet nach dem ELEGOO-Board (ESP32 DevKit, 30 Stifte, USB-C, Chip CP2102). Fotos des echten Boards: <a href="https://www.amazon.de/dp/B0D8T7LZF2" target="_blank" rel="noopener">Amazon-Angebot</a>.</figcaption>
+  </figure>
+  <div class="note warn"><b class="lab">Achtung: „16“ heißt „RX2“</b><p>Der Pin, den die Firmware als GPIO 16 benutzt, ist auf diesem Board mit <span class="pin">RX2</span> beschriftet. Er sitzt rechts zwischen <span class="pin">TX2</span> und <span class="pin">D4</span>.</p></div>
+</section>
+
+<!-- ============================================================ STEP 1 -->
+<section class="step" id="s1">
+  <div class="stephead"><div class="num">1</div><div><h2>Beide Fühler an eine Adapterplatine</h2><p class="muted">Beide Fühler kommen an dieselbe Platine. In jede Klemme gehören zwei Drähte gleicher Farbe.</p></div></div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 640 300" role="img" aria-labelledby="f1t">
+      <title id="f1t">Zwei Fühler, deren rote, gelbe und schwarze Drähte paarweise in die drei Schraubklemmen einer Adapterplatine gehen</title>
+      <rect class="probe" x="18" y="58" width="58" height="16" rx="8"/>
+      <rect class="probe" x="18" y="198" width="58" height="16" rx="8"/>
+      <text class="lbl" x="18" y="48">Fühler A</text>
+      <text class="lbl" x="18" y="188">Fühler B</text>
+      <path class="cable" d="M76 66 H196"/>
+      <path class="cable" d="M76 206 H196"/>
+      <path class="edge" d="M196 62 C250 62 270 96 316 112"/><path class="w red" d="M196 62 C250 62 270 96 316 112"/>
+      <path class="edge" d="M196 66 C255 66 300 120 380 120"/><path class="w yellow" d="M196 66 C255 66 300 120 380 120"/>
+      <path class="edge" d="M196 70 C260 72 360 104 444 116"/><path class="w black" d="M196 70 C260 72 360 104 444 116"/>
+      <path class="edge" d="M196 202 C250 202 280 150 324 130"/><path class="w red" d="M196 202 C250 202 280 150 324 130"/>
+      <path class="edge" d="M196 206 C260 206 330 150 388 132"/><path class="w yellow" d="M196 206 C260 206 330 150 388 132"/>
+      <path class="edge" d="M196 210 C280 212 400 160 452 132"/><path class="w black" d="M196 210 C280 212 400 160 452 132"/>
+      <rect class="pcb" x="290" y="100" width="190" height="120" rx="8"/>
+      <rect class="terminal" x="300" y="104" width="170" height="38" rx="4"/>
+      <circle class="screw" cx="320" cy="123" r="11"/><path d="M313 123h14" stroke="#7d8a93" stroke-width="2"/>
+      <circle class="screw" cx="385" cy="123" r="11"/><path d="M378 123h14" stroke="#7d8a93" stroke-width="2"/>
+      <circle class="screw" cx="450" cy="123" r="11"/><path d="M443 123h14" stroke="#7d8a93" stroke-width="2"/>
+      <text class="pcbtext" x="320" y="162" text-anchor="middle">VCC</text>
+      <text class="pcbtext" x="385" y="162" text-anchor="middle">DAT</text>
+      <text class="pcbtext" x="450" y="162" text-anchor="middle">GND</text>
+      <rect x="360" y="178" width="22" height="10" rx="2" fill="#2a2f33"/>
+      <text class="pcbtext" x="371" y="204" text-anchor="middle" style="font-size:9px">472</text>
+      <rect class="pinhead" x="480" y="170" width="28" height="5"/><rect class="pinhead" x="480" y="186" width="28" height="5"/><rect class="pinhead" x="480" y="202" width="28" height="5"/>
+      <text class="mono" x="516" y="176">VCC</text>
+      <text class="mono" x="516" y="192">DAT</text>
+      <text class="mono" x="516" y="208">GND</text>
+      <text class="small" x="516" y="232">→ weiter in Schritt 2</text>
+      <g transform="translate(18,262)">
+        <rect x="0" y="-9" width="22" height="6" rx="3" fill="var(--w-red)"/><text class="lbl" x="30" y="-2">rot → VCC</text>
+        <rect x="130" y="-9" width="22" height="6" rx="3" fill="var(--w-yellow)"/><text class="lbl" x="160" y="-2">gelb → DAT</text>
+        <rect x="270" y="-9" width="22" height="6" rx="3" fill="var(--w-black)" stroke="var(--wire-edge)"/><text class="lbl" x="300" y="-2">schwarz → GND</text>
+      </g>
+      <text class="small" x="18" y="290">Die Reihenfolge der Klemmen kann bei deiner Platine anders sein. Es gilt der Aufdruck.</text>
+    </svg>
+  </figure>
+
+  <ol class="do">
+    <li>Die Klemmschrauben ein paar Umdrehungen aufdrehen.</li>
+    <li>Den <b>roten</b> Draht von Fühler A <b>und</b> den roten Draht von Fühler B zusammen in die Klemme <span class="pin">VCC</span> stecken (manchmal „+“ oder „V“). Schraube festdrehen.</li>
+    <li>Genauso die beiden <b>gelben</b> Drähte in <span class="pin">DAT</span> (manchmal „DQ“, „S“ oder „OUT“). Ist der Datendraht weiß oder blau, gehört er hierhin.</li>
+    <li>Die beiden <b>schwarzen</b> Drähte in <span class="pin">GND</span> (manchmal „–“).</li>
+    <li>Ziehtest: An jedem Draht leicht ziehen. Keiner darf herausrutschen.</li>
+  </ol>
+  <div class="note tip"><b class="lab">Warum nur eine Platine?</b><p>Beide Fühler teilen sich eine Datenleitung. Jeder hat eine eigene Seriennummer, darüber unterscheidet der ESP sie. Eine Platine bedeutet nur 3 Kabel zum ESP.</p></div>
+  <label class="done"><input type="checkbox" id="c1" data-step> Fühler sind angeschlossen</label>
+</section>
+
+<!-- ============================================================ STEP 2 -->
+<section class="step" id="s2">
+  <div class="stephead"><div class="num">2</div><div><h2>Adapterplatine an den ESP32</h2><p class="muted">Drei Steckkabel, alle auf die rechte Seite des Boards.</p></div></div>
+
+  <figure class="figure">
+    <svg id="fig2" viewBox="0 0 720 420" role="img" aria-labelledby="f2t">
+      <title id="f2t">Adapterplatine rechts neben dem ESP32: rotes Kabel von VCC an RX2, gelbes von DAT an D4, schwarzes von GND an GND, alle auf der rechten Stiftreihe</title>
+      <g id="boardB" transform="translate(150,40)"></g>
+      <!-- adapter -->
+      <g transform="translate(520,200)">
+        <rect class="pcb" x="0" y="0" width="120" height="100" rx="8"/>
+        <rect class="terminal" x="88" y="8" width="26" height="84" rx="3"/>
+        <circle class="screw" cx="101" cy="24" r="8"/><circle class="screw" cx="101" cy="50" r="8"/><circle class="screw" cx="101" cy="76" r="8"/>
+        <rect class="pinhead" x="-16" y="21" width="16" height="5"/><rect class="pinhead" x="-16" y="41" width="16" height="5"/><rect class="pinhead" x="-16" y="61" width="16" height="5"/>
+        <text class="pcbtext" x="6" y="27">VCC</text><text class="pcbtext" x="6" y="47">DAT</text><text class="pcbtext" x="6" y="67">GND</text>
+        <path class="cable" d="M114 40 C150 40 160 20 190 10"/><path class="cable" d="M114 60 C150 60 160 80 190 90"/>
+        <text class="small" x="0" y="118">Adapterplatine</text>
+        <text class="small" x="130" y="120">zu den Fühlern</text>
+      </g>
+      <g id="wires2"></g>
+    </svg>
+    <figcaption>Das Board von oben, Antenne oben. Die Kabelfarben sind die vom Fühler-Set.</figcaption>
+  </figure>
+
+  <div class="tablewrap"><table class="map">
+    <thead><tr><th>Adapterplatine</th><th>Aufdruck am ESP32</th><th>Wo</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--w-red)"></span><b>VCC</b></td><td><span class="pin">RX2</span></td><td>rechts, 10. Stift von oben. Nicht an 3V3.</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-yellow)"></span><b>DAT</b></td><td><span class="pin">D4</span></td><td>rechts, direkt unter RX2</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td>rechts, vorletzter Stift</td></tr>
+    </tbody>
+  </table></div>
+  <label class="done"><input type="checkbox" id="c2" data-step> Adapterplatine ist am ESP</label>
+</section>
+
+<!-- ============================================================ STEP 3 -->
+<section class="step" id="s3">
+  <div class="stephead"><div class="num">3</div><div><h2>Anzeige an den ESP32</h2><p class="muted">Vier Steckkabel. Drei kommen rechts an, eines (GND) links unten, weil der rechte GND schon belegt ist.</p></div></div>
+
+  <figure class="figure">
+    <svg id="fig3" viewBox="0 0 720 470" role="img" aria-labelledby="f3t">
+      <title id="f3t">Anzeige rechts oben: CLK an D18, DIO an D23, VCC an 3V3 rechts unten, GND an GND links unten. Die Fühler-Kabel aus Schritt 2 sind blass eingezeichnet.</title>
+      <g id="boardC" transform="translate(150,60)"></g>
+      <!-- display module -->
+      <g transform="translate(470,8)">
+        <rect class="pcb" x="0" y="0" width="190" height="78" rx="6"/>
+        <circle cx="10" cy="10" r="4" fill="var(--bg)"/><circle cx="180" cy="10" r="4" fill="var(--bg)"/><circle cx="10" cy="68" r="4" fill="var(--bg)"/><circle cx="180" cy="68" r="4" fill="var(--bg)"/>
+        <svg class="seg7" data-text="-18°" x="18" y="12" width="138" height="54"></svg>
+        <rect class="pinhead" x="190" y="13" width="20" height="5"/><rect class="pinhead" x="190" y="29" width="20" height="5"/><rect class="pinhead" x="190" y="45" width="20" height="5"/><rect class="pinhead" x="190" y="61" width="20" height="5"/>
+        <text class="pcbtext" x="186" y="19" text-anchor="end" style="font-size:8px">CLK</text>
+        <text class="pcbtext" x="186" y="35" text-anchor="end" style="font-size:8px">DIO</text>
+        <text class="pcbtext" x="186" y="51" text-anchor="end" style="font-size:8px">VCC</text>
+        <text class="pcbtext" x="186" y="67" text-anchor="end" style="font-size:8px">GND</text>
+      </g>
+      <text class="small" x="470" y="100">Anzeige (Stifte laut Aufdruck)</text>
+      <g id="wires3"></g>
+    </svg>
+    <figcaption>Blass: die Kabel aus Schritt 2. Bei der Anzeige gilt die Beschriftung an ihren Stiften.</figcaption>
+  </figure>
+
+  <div class="tablewrap"><table class="map">
+    <thead><tr><th>Anzeige</th><th>Aufdruck am ESP32</th><th>Wo</th></tr></thead>
+    <tbody>
+      <tr><td><span class="dot" style="background:var(--w-orange)"></span><b>VCC</b></td><td><span class="pin">3V3</span></td><td>rechts, letzter Stift. <b>Nicht an VIN</b>, das sind 5 V.</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-black)"></span><b>GND</b></td><td><span class="pin">GND</span></td><td><b>links</b>, vorletzter Stift (neben VIN)</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-green)"></span><b>DIO</b></td><td><span class="pin">D23</span></td><td>rechts, oberster Stift</td></tr>
+      <tr><td><span class="dot" style="background:var(--w-blue)"></span><b>CLK</b></td><td><span class="pin">D18</span></td><td>rechts, 7. Stift von oben</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note tip"><b class="lab">Tipp</b><p>Nimm für Strom ein rotes oder oranges Kabel und für GND ein schwarzes. Dann siehst du beim Prüfen sofort, was wohin gehört.</p></div>
+  <label class="done"><input type="checkbox" id="c3" data-step> Anzeige ist am ESP</label>
+</section>
+
+<!-- ============================================================ STEP 4 -->
+<section class="step" id="s4">
+  <div class="stephead"><div class="num">4</div><div><h2>Prüfen, bevor Strom drauf kommt</h2><p class="muted">Zwei Minuten, die Ärger sparen. Vertauschte Kabel sind der einzige Fehler, der wirklich etwas kaputt machen kann.</p></div></div>
+  <ul class="do">
+    <li>Fühler-VCC steckt an <span class="pin">RX2</span> und nicht an 3V3.</li>
+    <li>Anzeige-VCC steckt an <span class="pin">3V3</span> und nicht an <span class="pin">VIN</span>.</li>
+    <li>Kein GND-Kabel steckt an einem Strom-Pin und umgekehrt.</li>
+    <li>Alle 7 Steckkabel sitzen ganz auf den Stiften, keines hängt schief.</li>
+    <li>Keine blanken Drahtenden berühren sich an der Adapterplatine.</li>
+  </ul>
+  <label class="done"><input type="checkbox" id="c4" data-step> Alles geprüft</label>
+</section>
+
+<!-- ============================================================ STEP 5 -->
+<section class="step" id="s5">
+  <div class="stephead"><div class="num">5</div><div><h2>Firmware aufspielen</h2><p class="muted">Nur einmal nötig, am PC mit Chrome oder Edge. Spätere Updates gehen über das WLAN.</p></div></div>
+  <div class="note tip"><b class="lab">Datei</b><p>Du brauchst die Datei <code>kuehlschrank-full.bin</code> aus dem Projektordner <code>firmware/</code>. Lass sie dir schicken oder kopiere sie auf den PC.</p></div>
+  <ol class="do">
+    <li>ESP32 mit dem USB-Kabel an den PC anschließen. Auf dem Board leuchtet eine rote LED.</li>
+    <li>In Chrome oder Edge diese Seite öffnen:
+      <div class="copyrow" style="margin-top:6px"><code id="flashurl">https://espressif.github.io/esptool-js/</code><button class="copy" type="button" data-copy="flashurl">Kopieren</button><a href="https://espressif.github.io/esptool-js/" target="_blank" rel="noopener">öffnen</a></div></li>
+    <li>Bei <b>Baudrate</b> <code>460800</code> wählen und auf <b>Connect</b> klicken. Im Fenster den Eintrag mit „CP210x“ wählen.</li>
+    <li>Steht dort lange „Connecting…“: die Taste <b>BOOT</b> (rechts neben der USB-Buchse) gedrückt halten, bis es weitergeht.</li>
+    <li>Unter „Program“ bei <b>Flash Address</b> <code>0x0</code> eintragen und die Datei <code>kuehlschrank-full.bin</code> auswählen.</li>
+    <li>Auf <b>Program</b> klicken und warten, bis 100 % erreicht sind (etwa 30 Sekunden).</li>
+    <li>Die Taste <b>EN</b> (links neben der USB-Buchse) drücken, oder das USB-Kabel kurz abziehen und wieder einstecken.</li>
+  </ol>
+  <div class="note warn"><b class="lab">Kein Port in der Liste?</b><p>Dann fehlt der USB-Treiber „CP210x“ von Silicon Labs. Windows installiert ihn meist von selbst, sonst einmal von der Silicon-Labs-Seite installieren und den Browser neu laden. Prüfe auch, ob das Kabel Daten überträgt. Reine Ladekabel gehen nicht.</p></div>
+  <label class="done"><input type="checkbox" id="c5" data-step> Firmware ist drauf</label>
+</section>
+
+<!-- ============================================================ STEP 6 -->
+<section class="step" id="s6">
+  <div class="stephead"><div class="num">6</div><div><h2>Erster Start</h2><p class="muted">So sieht es aus, wenn alles stimmt.</p></div></div>
+  <figure class="figure">
+    <svg viewBox="0 0 700 190" role="img" aria-labelledby="f6t">
+      <title id="f6t">Ablauf der Anzeige beim Start: AP, 192, 168, 4, 1, danach abwechselnd 4 Grad und minus 18 Grad</title>
+      <svg class="seg7" data-text="AP  " x="0" y="20" width="104" height="44"></svg>
+      <svg class="seg7" data-text=" 192" x="110" y="20" width="104" height="44"></svg>
+      <svg class="seg7" data-text=" 168" x="220" y="20" width="104" height="44"></svg>
+      <svg class="seg7" data-text="   4" x="330" y="20" width="104" height="44"></svg>
+      <svg class="seg7" data-text="   1" x="440" y="20" width="104" height="44"></svg>
+      <svg class="seg7" data-text="  4°" x="580" y="10" width="104" height="44"></svg>
+      <svg class="seg7" data-text="-18°" x="580" y="80" width="104" height="44"></svg>
+      <path class="arrow" d="M548 42 h22"/><path class="arrowhead" d="M570 37 l7 5 l-7 5z"/>
+      <path class="arrow" d="M690 34 C705 50 705 88 690 102"/><path class="arrowhead" d="M693 97 l-6 7 l9 1z"/>
+      <text class="small" x="0" y="92">Adresse der Webseite, je 1,5 s:</text>
+      <text class="small" x="0" y="107">„AP“, dann 192.168.4.1</text>
+      <text class="small" x="580" y="150">Kühlteil und Gefrierfach,</text>
+      <text class="small" x="580" y="165">im Wechsel alle 3 s</text>
+    </svg>
+  </figure>
+  <ol class="do">
+    <li>Die Anzeige zeigt kurz <code>AP</code> und dann nacheinander <code>192</code> <code>168</code> <code>4</code> <code>1</code>, die Adresse der Webseite. Danach wechseln die Temperaturen.</li>
+    <li>Am Handy das WLAN <b>Kuehlschrank</b> wählen, Passwort <b>kuehlschrank</b>.</li>
+    <li>Meist öffnet sich die Seite von selbst. Sonst im Browser <code>192.168.4.1</code> eingeben.</li>
+    <li>Fragt das Handy „Dieses Netz hat kein Internet, trotzdem verbunden bleiben?“: <b>Ja</b>.</li>
+    <li>Einen Fühler in der Hand halten. Nach ein paar Sekunden steigt sein Wert Richtung 30 °C. So weißt du, welcher welcher ist.</li>
+  </ol>
+  <div class="note tip"><b class="lab">Namen</b><p>Ein Fühler unter −5 °C heißt automatisch „Gefrierfach“, sonst „Kühlschrank“. Beim ersten Start auf dem Tisch heißen also beide „Kühlschrank“. Auf der Webseite unter <b>Einstellungen</b> kannst du sie umbenennen oder tauschen.</p></div>
+  <label class="done"><input type="checkbox" id="c6" data-step> Seite geht auf dem Handy</label>
+</section>
+
+<!-- ============================================================ STEP 7 -->
+<section class="step" id="s7">
+  <div class="stephead"><div class="num">7</div><div><h2>Am Kühlschrank einbauen</h2><p class="muted">Elektronik außen, nur die Fühler kommen nach innen.</p></div></div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 640 430" role="img" aria-labelledby="f7t">
+      <title id="f7t">Kühlschrank von vorne: ESP und Anzeige außen oben an der Seite, Fühlerkabel mit Klebeband am Gehäuse gesichert und an der Scharnierseite durch die Dichtung, ein Fühler mittig im Kühlteil, einer mittig im Gefrierfach</title>
+      <rect class="outline" x="190" y="30" width="230" height="370" rx="10"/>
+      <rect class="inside" x="204" y="44" width="202" height="210" rx="4"/>
+      <rect class="inside" x="204" y="270" width="202" height="118" rx="4" style="fill:var(--bg)"/>
+      <line class="shelf" x1="204" y1="110" x2="406" y2="110"/>
+      <line class="shelf" x1="204" y1="180" x2="406" y2="180"/>
+      <line class="shelf" x1="204" y1="330" x2="406" y2="330"/>
+      <text class="small" x="214" y="62">Kühlteil</text>
+      <text class="small" x="214" y="288">Gefrierfach</text>
+      <rect x="182" y="40" width="8" height="18" rx="2" fill="var(--muted)"/><rect x="182" y="372" width="8" height="18" rx="2" fill="var(--muted)"/>
+      <text class="small" x="96" y="24">Scharnierseite</text>
+      <!-- ESP + display -->
+      <rect x="112" y="64" width="64" height="30" rx="3" fill="var(--pcb)"/>
+      <svg class="seg7" data-text="  4°" x="116" y="68" width="56" height="22"></svg>
+      <rect x="128" y="98" width="32" height="44" rx="3" fill="var(--board)" stroke="var(--board-edge)"/>
+      <text class="lbl" x="14" y="80">Anzeige + ESP</text>
+      <text class="small" x="14" y="96">außen, seitlich oben</text>
+      <path d="M144 142 C144 200 110 230 110 280 L110 420" fill="none" stroke="var(--muted)" stroke-width="3"/>
+      <text class="small" x="18" y="330">USB zur</text><text class="small" x="18" y="344">Steckdose</text>
+      <!-- probe cables -->
+      <path class="cable" d="M160 130 C176 150 184 160 186 175 C188 190 192 200 200 205 C250 210 280 205 300 205" style="stroke-width:4"/>
+      <path class="cable" d="M154 140 C176 200 180 300 186 330 C190 345 194 350 200 352 C240 356 280 352 300 352" style="stroke-width:4"/>
+      <!-- tape on cabinet side -->
+      <rect class="tape" x="170" y="160" width="22" height="9" rx="1" transform="rotate(-20 181 164)"/>
+      <rect class="tape" x="172" y="300" width="22" height="9" rx="1" transform="rotate(-8 183 304)"/>
+      <rect class="probe" x="300" y="199" width="34" height="12" rx="6"/>
+      <rect class="probe" x="300" y="346" width="34" height="12" rx="6"/>
+      <circle cx="198" cy="205" r="7" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="198" cy="352" r="7" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <text class="lbl" x="440" y="190">Fühler Kühlteil</text>
+      <text class="small" x="440" y="206">mittleres Fach, Mitte,</text>
+      <text class="small" x="440" y="220">nicht an der Rückwand</text>
+      <path class="arrow" d="M436 200 L340 205"/>
+      <text class="lbl" x="440" y="342">Fühler Gefrierfach</text>
+      <text class="small" x="440" y="358">mittig, frei liegend,</text>
+      <text class="small" x="440" y="372">nicht am Lüfter</text>
+      <path class="arrow" d="M436 352 L340 352"/>
+      <text class="lbl" x="440" y="80" style="fill:var(--accent)">○ Durchgang Dichtung</text>
+      <text class="small" x="440" y="96">an der Scharnierseite,</text>
+      <text class="small" x="440" y="110">eher oben oder unten</text>
+      <path class="arrow" d="M436 92 C320 100 230 150 204 198"/>
+      <text class="lbl" x="14" y="250">Klebeband</text>
+      <text class="small" x="14" y="266">am Gehäuse, nicht</text>
+      <text class="small" x="14" y="280">an Tür oder Dichtung</text>
+      <path class="arrow" d="M100 256 C140 250 160 200 176 170"/>
+    </svg>
+  </figure>
+
+  <ol class="do">
+    <li><b>Anzeige und ESP</b> mit Klettband außen an die Seite oder oben auf den Kühlschrank. Nicht hinten auf die Metallrückwand: Dort wird es warm und das WLAN ist schwach.</li>
+    <li><b>Fühler Kühlteil</b> ins mittlere Fach, vorne bis Mitte. Nicht an die Rückwand legen, die ist beim Kühlen eiskalt und verfälscht den Wert.</li>
+    <li><b>Fühler Gefrierfach</b> mittig zwischen das Gefriergut, frei und nicht direkt vor dem Lüfter oder an der Wand.</li>
+    <li><b>Innen</b> das Kabel hinter die Kante eines Fachs oder Türfachs klemmen. Klebeband hält auf kalten, feuchten Innenwänden schlecht.</li>
+    <li><b>Außen mit Klebeband sichern</b>, siehe unten.</li>
+  </ol>
+  <div class="note tip"><b class="lab">Ruhigere Werte</b><p>Ein Fühler in der Luft zeigt jedes Türöffnen als Ausschlag. Steckst du die Metallhülse im Kühlteil in ein kleines Glas Wasser, misst er eher die Temperatur der Lebensmittel und der Verlauf wird glatter.</p></div>
+  <label class="done"><input type="checkbox" id="c7" data-step> Eingebaut</label>
+</section>
+
+<!-- ============================================================ DOOR -->
+<section class="step" id="tuer">
+  <h2>Kabel durch die Tür</h2>
+  <p><b>Das ist der übliche Weg.</b> Das Fühlerkabel ist rund und etwa 4 mm dick. Die weiche Magnetdichtung legt sich darum. Es kommt auf die Stelle an und auf eine kurze Kontrolle danach.</p>
+
+  <figure class="figure">
+    <svg viewBox="0 0 640 270" role="img" aria-labelledby="f8t">
+      <title id="f8t">Schnitt von oben durch die Türkante: Die Magnetdichtung zwischen Gehäuse und Tür umschließt das Kabel. Außen ist das Kabel am Gehäuse mit Klebeband gesichert, mit etwas Spiel vor der Dichtung.</title>
+      <text class="lbl" x="30" y="30">innen (kalt)</text>
+      <text class="lbl" x="520" y="30">außen (warm)</text>
+      <rect class="outline" x="30" y="140" width="290" height="40" rx="3"/>
+      <text class="small" x="44" y="165">Gehäusewand</text>
+      <rect class="door" x="30" y="60" width="290" height="40" rx="3"/>
+      <text class="small" x="44" y="85">Tür (geschlossen)</text>
+      <path class="gasket" d="M250 100 h70 v40 h-70 c-14 -6 -14 -34 0 -40z"/>
+      <path class="cable" d="M292 120 C330 120 350 130 380 160 C400 182 420 190 460 192 L610 192" style="stroke-width:5"/>
+      <path class="cable" d="M292 120 C220 120 150 200 40 220" style="stroke-width:5"/>
+      <circle cx="292" cy="120" r="9" fill="#5b6670" stroke="#3b444b" stroke-width="2"/>
+      <circle cx="292" cy="120" r="3" fill="var(--w-yellow)"/>
+      <!-- cabinet outer side + tape -->
+      <rect x="320" y="180" width="300" height="10" fill="var(--rule)"/>
+      <text class="small" x="500" y="212">Gehäuse-Seitenwand außen</text>
+      <rect class="tape" x="470" y="183" width="30" height="16" rx="1"/>
+      <rect class="tape" x="560" y="183" width="30" height="16" rx="1"/>
+      <text class="lbl" x="440" y="245">Klebeband, 5–10 cm nach der Dichtung</text>
+      <path class="arrow" d="M480 232 L484 202"/><path class="arrowhead" d="M480 204 l4 -9 l4 9z"/>
+      <text class="small" x="340" y="128">etwas Spiel lassen</text>
+      <path class="arrow" d="M300 214 L290 132"/><path class="arrowhead" d="M286 134 l4 -9 l4 9z"/>
+      <text class="lbl" x="200" y="232">Dichtung drückt sich ums Kabel</text>
+      <path class="arrow" d="M420 54 L310 98"/><path class="arrowhead" d="M312 92 l-8 7 l10 2z"/>
+      <text class="lbl" x="424" y="58">Magnetdichtung</text>
+    </svg>
+  </figure>
+
+  <ol class="do">
+    <li><b>An der Scharnierseite durchführen.</b> Dort bewegt sich die Dichtung beim Öffnen kaum. Auf der Griffseite reibt sie bei jedem Öffnen über das Kabel.</li>
+    <li><b>Eher weit oben oder unten</b> an der Scharnierseite, nicht in der Mitte der Türhöhe. Dort drückt die Dichtung am gleichmäßigsten.</li>
+    <li><b>Kabel flach anlegen</b>, nicht verdreht und ohne Schlaufe in der Dichtung.</li>
+    <li><b>Papiertest:</b> Tür schließen und direkt neben dem Kabel ein Blatt Papier einklemmen. Lässt es sich ohne Widerstand herausziehen, ist die Dichtung dort undicht. Dann ein paar Zentimeter versetzen.</li>
+    <li><b>Nach 2–3 Tagen nachschauen:</b> Bildet sich am Kabel Reif oder Kondenswasser, zieht dort warme Luft hinein.</li>
+  </ol>
+
+  <h3>Soll das Kabel außen festgeklebt werden?</h3>
+  <p><b>Ja.</b> Das Klebeband nimmt den Zug vom Kabel. Wenn jemand beim Öffnen hängen bleibt, reißt sonst der Fühler aus der Klemme der Adapterplatine.</p>
+  <ul class="do">
+    <li>Das Kabel <b>auf das Gehäuse</b> kleben (die Seitenwand), 5–10 cm hinter der Dichtung. <b>Nicht auf die Tür und nicht auf die Dichtung:</b> Die Tür bewegt sich, und Klebereste auf der Dichtung machen sie undicht.</li>
+    <li>Zwischen Dichtung und Klebeband <b>etwas Spiel lassen</b>, damit die Tür das Kabel beim Öffnen nicht strafft.</li>
+    <li>Noch ein Stück Band kurz vor der Elektronik, damit das Gewicht des Kabels nicht an den Steckkabeln hängt.</li>
+    <li>Malerkrepp oder Gewebeband geht gut. Auf lackierten Flächen lässt sich Malerkrepp später rückstandsfrei abziehen.</li>
+  </ul>
+
+  <h3>Ummantelung an der Durchführung entfernen?</h3>
+  <p>Unter der grauen Ummantelung liegen drei dünne Adern. Ohne Mantel liegen sie flach nebeneinander, etwa 1,5 mm statt 4 mm. Die Dichtung schließt dann besser. Es hat aber Nachteile.</p>
+  <div class="two">
+    <div class="choice"><h3>Erst ohne probieren</h3><p>Bei den meisten Kühlschränken reicht das runde Kabel. Wenn der Papiertest klappt und nach ein paar Tagen kein Reif am Kabel ist, bleibt der Mantel dran.</p></div>
+    <div class="choice"><h3>Nur wenn es nicht dicht wird</h3><p>Erst dann den Mantel an der Durchgangsstelle entfernen. Das macht am besten ein Erwachsener, siehe unten.</p></div>
+  </div>
+  <div class="note warn"><b class="lab">Wenn Mantel ab, dann so</b>
+    <ul class="do">
+      <li>Nur ein kurzes Stück, etwa <b>6–8 cm</b>, genau da, wo das Kabel in der Dichtung liegt.</li>
+      <li>Mit einer <b>Abisolierzange</b> oder einem Abmantler arbeiten. Mit dem Cuttermesser nur <b>längs</b> und ganz flach einritzen, nie rundherum schneiden. Ein Schnitt in eine Ader macht den Fühler kaputt.</li>
+      <li>Danach jede Ader prüfen: Ist irgendwo Kupfer zu sehen, die Stelle mit Isolierband umwickeln.</li>
+      <li>Die drei Adern flach nebeneinander legen und mit <b>einer Lage Isolierband</b> zu einem flachen Band zusammenfassen. Die Enden des Mantels ebenfalls mit Isolierband umwickeln.</li>
+      <li>Die dünnen Adern sind empfindlicher. Hier ist das Klebeband außen besonders wichtig, damit kein Zug darauf kommt.</li>
+    </ul>
+  </div>
+  <div class="note warn"><b class="lab">Gefrierfach</b><p>Hier ist ein kleiner Spalt schneller ein Problem, weil sich Eis aufbaut. Den Papiertest beim Gefrierfach besonders sorgfältig machen und in der ersten Woche auf Reif an der Kabelstelle achten.</p></div>
+  <div class="note tip"><b class="lab">Nicht bohren</b><p>Löcher in Gehäuse oder Tür sind keine gute Idee. In den Wänden liegen Kältemittelleitungen. Die Dichtung ist die richtige Stelle.</p></div>
+</section>
+
+<!-- ============================================================ TROUBLE -->
+<section class="step" id="hilfe">
+  <h2>Wenn etwas nicht klappt</h2>
+  <div class="trouble">
+    <div><b>Anzeige bleibt dunkel</b><p>Anzeige-Kabel prüfen: VCC an 3V3, GND an GND (links), DIO an D23, CLK an D18. Ist die Firmware drauf? Ohne Firmware bleibt die Anzeige dunkel.</p></div>
+    <div><b>Anzeige zeigt <code>----</code></b><p>Der Fühler liefert keine Werte. Prüfen: Adapter-VCC an <b>RX2</b>, DAT an <b>D4</b>, GND an GND, und die Drähte sitzen fest in den Klemmen. Die Webseite zeigt „Fühler nicht gefunden“.</p></div>
+    <div><b>Nur ein Fühler erscheint</b><p>Ein Draht des zweiten Fühlers sitzt nicht richtig in der Klemme. Alle drei Klemmen nachziehen. Der ESP sucht alle 30 Sekunden neu.</p></div>
+    <div><b>WLAN „Kuehlschrank“ fehlt</b><p>USB-Kabel und Ladegerät prüfen. Leuchtet die rote LED auf dem ESP? Kurz die Taste EN drücken.</p></div>
+    <div><b>Seite öffnet sich nicht</b><p>Im Browser von Hand <code>192.168.4.1</code> eingeben. Mobile Daten am Handy kurz ausschalten, falls das Handy die Seite übers Mobilnetz sucht.</p></div>
+    <div><b>Adresse vergessen</b><p>Die Taste <b>BOOT</b> kurz drücken. Die Anzeige zeigt die Adresse noch einmal.</p></div>
+    <div><b>Verlauf ist leer</b><p>Nach einem Stromausfall beginnt der Verlauf neu. Er füllt sich mit einem Wert pro Minute.</p></div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+/* ---------- 7-segment display (TM1637, 0.36", 4 digits, colon, no decimal points) ---------- */
+const MASK={'0':0x3f,'1':0x06,'2':0x5b,'3':0x4f,'4':0x66,'5':0x6d,'6':0x7d,'7':0x07,'8':0x7f,'9':0x6f,
+  '-':0x40,'°':0x63,'A':0x77,'P':0x73,' ':0};
+const DW=34,DH=60,T=7,GAP=12,COLON=12,PADX=10,PADY=9,SKEW=-0.12;
+const VBW=PADX*2+DW*4+GAP*2+COLON+GAP*0+8, VBH=PADY*2+DH;
+function hseg(x,y,xa,xb){const h=T/2;return[[xa+1,y],[xa+1+h,y-h],[xb-1-h,y-h],[xb-1,y],[xb-1-h,y+h],[xa+1+h,y+h]].map(p=>[p[0]+x,p[1]])}
+function vseg(x,ya,yb){const h=T/2;return[[x,ya+1],[x+h,ya+1+h],[x+h,yb-1-h],[x,yb-1],[x-h,yb-1-h],[x-h,ya+1+h]]}
+function segPolys(ox,oy){
+  const h=T/2,L=ox+h,R=ox+DW-h,top=oy+h,mid=oy+DH/2,bot=oy+DH-h;
+  return [hseg(0,top,L,R),vseg(R,top,mid),vseg(R,mid,bot),hseg(0,bot,L,R),vseg(L,mid,bot),vseg(L,top,mid),hseg(0,mid,L,R)];
+}
+function skew(p){return [p[0]+SKEW*(p[1]-VBH/2),p[1]]}
+function poly(pts,cls){return '<polygon class="'+cls+'" points="'+pts.map(skew).map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'"/>'}
+function render(svg){
+  const txt=(svg.dataset.text||'    ').padEnd(4).slice(0,4);
+  svg.setAttribute('viewBox','0 0 '+VBW+' '+VBH);
+  if(!svg.getAttribute('preserveAspectRatio'))svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  let s='<rect x="0" y="0" width="'+VBW+'" height="'+VBH+'" rx="4" fill="var(--led-bg)"/>';
+  for(let i=0;i<4;i++){
+    const ox=PADX+4+i*(DW+GAP)+(i>=2?COLON:0),m=MASK[txt[i]]??0;
+    segPolys(ox,PADY).forEach((p,k)=>{s+=poly(p,(m>>k)&1?'on':'off')});
+  }
+  const cx=PADX+4+2*DW+GAP+COLON/2+GAP/2-6,r=3.2;
+  [PADY+DH*0.33,PADY+DH*0.67].forEach(cy=>{const p=skew([cx,cy]);s+='<circle cx="'+p[0].toFixed(1)+'" cy="'+cy+'" r="'+r+'" fill="var(--led-off)"/>'});
+  s='<style>.on{fill:var(--led-on);filter:drop-shadow(0 0 2px rgba(255,59,47,.7))}.off{fill:var(--led-off)}</style>'+s;
+  svg.innerHTML=s;
+}
+document.querySelectorAll('svg.seg7').forEach(render);
+
+/* ---------- ESP32 DevKit (30 pin, USB-C) ---------- */
+const S=6, PITCH=2.54*S, W=29*S, H=51.74*S;
+const LEFT=['EN','VP','VN','D34','D35','D32','D33','D25','D26','D27','D14','D12','D13','GND','VIN'];
+const RIGHT=['D23','D22','TX0','RX0','D21','D19','D18','D5','TX2','RX2','D4','D2','D15','GND','3V3'];
+const pinY=i=>(11.2*S)+i*PITCH, LX=2.3*S, RX=W-2.3*S;
+function board(highlight){
+  let s='';
+  s+='<rect class="board" x="0" y="0" width="'+W+'" height="'+H+'" rx="10"/>';
+  [[9,9],[W-9,9],[9,H-9],[W-9,H-9]].forEach(p=>{s+='<circle class="hole" cx="'+p[0]+'" cy="'+p[1]+'" r="6"/>'});
+  // antenna + module
+  s+='<rect x="'+(W/2-52)+'" y="4" width="104" height="40" fill="#0f1113" stroke="#2c3135"/>';
+  s+='<path d="M'+(W/2-44)+' 36 v-22 h14 v16 h14 v-16 h14 v16 h14 v-16 h14 v16 h14" fill="none" stroke="#3a4046" stroke-width="2"/>';
+  s+='<rect class="can" x="'+(W/2-46)+'" y="44" width="92" height="92" rx="3"/>';
+  s+='<text x="'+(W/2)+'" y="84" text-anchor="middle" style="font-family:var(--font-mono);font-weight:700;font-size:15px;fill:#3a4248">ESP-32</text>';
+  s+='<text x="'+(W/2)+'" y="102" text-anchor="middle" style="font-family:var(--font-mono);font-size:7px;fill:#3a4248">WIFI+BT SoC Inside</text>';
+  // small parts
+  for(let k=0;k<5;k++)s+='<rect class="smd" x="'+(W/2-40+k*16)+'" y="150" width="10" height="5" rx="1"/>';
+  s+='<rect x="'+(W/2-58)+'" y="176" width="14" height="10" rx="1" fill="#d6a23a"/>';
+  s+='<rect class="chip" x="'+(W/2-40)+'" y="198" width="26" height="34" rx="1"/>';
+  s+='<rect class="chip" x="'+(W/2+12)+'" y="196" width="26" height="26" rx="2"/>';
+  s+='<text x="'+(W/2+25)+'" y="212" text-anchor="middle" style="font-family:var(--font-mono);font-size:5px;fill:#9aa3a9">CP2102</text>';
+  // USB-C + buttons
+  s+='<rect class="usb" x="'+(W/2-27)+'" y="'+(H-38)+'" width="54" height="54" rx="8"/>';
+  s+='<rect x="'+(W/2-18)+'" y="'+(H-2)+'" width="36" height="8" rx="4" fill="#5d666c"/>';
+  s+='<rect class="btn" x="12" y="'+(H-48)+'" width="22" height="22" rx="3"/><circle class="btncap" cx="23" cy="'+(H-37)+'" r="6"/>';
+  s+='<rect class="btn" x="'+(W-34)+'" y="'+(H-48)+'" width="22" height="22" rx="3"/><circle class="btncap" cx="'+(W-23)+'" cy="'+(H-37)+'" r="6"/>';
+  s+='<text class="silk" x="23" y="'+(H-16)+'" text-anchor="middle">EN</text>';
+  s+='<text class="silk" x="'+(W-23)+'" y="'+(H-16)+'" text-anchor="middle">BOOT</text>';
+  s+='<circle cx="'+(W/2+44)+'" cy="168" r="3" fill="#ff4a3a"/>';
+  // pins + labels
+  LEFT.forEach((n,i)=>{const y=pinY(i);s+='<circle class="pad" cx="'+LX+'" cy="'+y+'" r="5.5"/><circle class="padhole" cx="'+LX+'" cy="'+y+'" r="2.4"/>';
+    s+='<text class="silk" x="'+(LX+9)+'" y="'+(y+2.8)+'">'+n+'</text>'});
+  RIGHT.forEach((n,i)=>{const y=pinY(i);s+='<circle class="pad" cx="'+RX+'" cy="'+y+'" r="5.5"/><circle class="padhole" cx="'+RX+'" cy="'+y+'" r="2.4"/>';
+    s+='<text class="silk" x="'+(RX-9)+'" y="'+(y+2.8)+'" text-anchor="end">'+n+'</text>'});
+  (highlight||[]).forEach(h=>{const x=h.side==='L'?LX:RX,y=pinY(h.i);s+='<circle class="ring" cx="'+x+'" cy="'+y+'" r="8.5" style="stroke:'+h.color+'"/>'});
+  return s;
+}
+const C={red:'var(--w-red)',yellow:'var(--w-yellow)',black:'var(--w-black)',orange:'var(--w-orange)',green:'var(--w-green)',blue:'var(--w-blue)'};
+const allHL=[{side:'R',i:0,color:C.green},{side:'R',i:6,color:C.blue},{side:'R',i:9,color:C.red},{side:'R',i:10,color:C.yellow},{side:'R',i:13,color:C.black},{side:'R',i:14,color:C.orange},{side:'L',i:13,color:C.black}];
+
+// overview
+document.getElementById('boardA').innerHTML=board(allHL);
+(function(){const g=document.getElementById('boardfig');const ox=190,oy=40;let s='';
+  const lines=[[0,'R',112],[6,'R',203],[9,'R',249],[10,'R',264],[13,'R',310],[14,'R',325]];
+  lines.forEach(([i,side,ty])=>{const y=oy+pinY(i);s+='<path d="M'+(ox+RX+9)+' '+y+' L432 '+(ty-4)+'" fill="none" stroke="var(--muted)" stroke-width="1"/>'});
+  s+='<path d="M'+(ox+LX-9)+' '+(oy+pinY(13))+' L120 306" fill="none" stroke="var(--muted)" stroke-width="1"/>';
+  g.insertAdjacentHTML('beforeend',s);})();
+
+function wire(cls,d,faded){return '<g'+(faded?' class="faded"':'')+'><path class="edge" d="'+d+'"/><path class="w '+cls+'" d="'+d+'"/></g>'}
+function dupont(x,y,faded){return '<rect class="dupont'+(faded?' faded':'')+'" x="'+(x-5)+'" y="'+(y-7)+'" width="10" height="14" rx="1.5"/>'}
+
+// step 2
+document.getElementById('boardB').innerHTML=board([{side:'R',i:9,color:C.red},{side:'R',i:10,color:C.yellow},{side:'R',i:13,color:C.black}]);
+(function(){const ox=150,oy=40,px=ox+RX;let s='';
+  const tgt=[[9,'red',200+23],[10,'yellow',200+43],[13,'black',200+63]];
+  tgt.forEach(([i,c,ty])=>{const y=oy+pinY(i);s+=wire(c,'M'+px+' '+y+' C'+(px+70)+' '+y+' '+(504-60)+' '+ty+' 504 '+ty)});
+  tgt.forEach(([i])=>{s+=dupont(px,oy+pinY(i))});
+  document.getElementById('wires2').innerHTML=s;})();
+
+// step 3
+document.getElementById('boardC').innerHTML=board([{side:'R',i:0,color:C.green},{side:'R',i:6,color:C.blue},{side:'R',i:14,color:C.orange},{side:'L',i:13,color:C.black}]);
+(function(){const ox=150,oy=60,px=ox+RX,lx=ox+LX;let s='';
+  // faded step-2 wires
+  [[9,'red'],[10,'yellow'],[13,'black']].forEach(([i,c])=>{const y=oy+pinY(i);s+=wire(c,'M'+px+' '+y+' C'+(px+60)+' '+y+' '+(px+80)+' '+(y+10)+' '+(px+120)+' '+(y+12),true)});
+  const dx=470+210; // display pins x
+  const pinYd={CLK:8+15.5,DIO:8+31.5,VCC:8+47.5,GND:8+63.5};
+  // DIO -> D23
+  let y=oy+pinY(0);
+  s+=wire('green','M'+dx+' '+pinYd.DIO+' H'+(dx+12)+' C'+(dx+24)+' '+pinYd.DIO+' '+(dx+24)+' '+(y-30)+' '+(dx-40)+' '+(y-6)+' C'+(px+80)+' '+y+' '+(px+40)+' '+y+' '+px+' '+y);
+  // CLK -> D18
+  y=oy+pinY(6);
+  s+=wire('blue','M'+dx+' '+pinYd.CLK+' H'+(dx+20)+' C'+(dx+36)+' '+pinYd.CLK+' '+(dx+36)+' '+(y-20)+' '+(dx-10)+' '+(y-4)+' C'+(px+110)+' '+y+' '+(px+50)+' '+y+' '+px+' '+y);
+  // VCC -> 3V3
+  y=oy+pinY(14);
+  s+=wire('orange','M'+dx+' '+pinYd.VCC+' H'+(dx+28)+' C'+(dx+30)+' '+(pinYd.VCC+40)+' '+(dx+30)+' '+(y-60)+' '+(dx-60)+' '+(y-6)+' C'+(px+90)+' '+y+' '+(px+40)+' '+y+' '+px+' '+y);
+  // GND -> left GND, around the bottom of the board
+  y=oy+pinY(13);const by=oy+H+40;
+  s+=wire('black','M'+dx+' '+pinYd.GND+' H'+(dx+18)+' C'+(dx+22)+' '+(pinYd.GND+60)+' '+(dx+22)+' '+(by-40)+' '+(dx-30)+' '+by+' H'+(lx-50)+' C'+(lx-80)+' '+by+' '+(lx-80)+' '+y+' '+(lx-40)+' '+y+' H'+lx);
+  [[px,oy+pinY(0)],[px,oy+pinY(6)],[px,oy+pinY(14)],[lx,oy+pinY(13)]].forEach(p=>{s+=dupont(p[0],p[1])});
+  s+='<text class="small" x="'+(lx-90)+'" y="'+(by+18)+'">GND der Anzeige geht links an GND (neben VIN)</text>';
+  document.getElementById('wires3').innerHTML=s;})();
+
+/* ---------- progress ---------- */
+const boxes=[...document.querySelectorAll('input[data-step]')];
+const fill=document.getElementById('barfill'),txt=document.getElementById('bartext');
+const KEY='fridge-guide-steps';
+let saved={};
+try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){saved={}}
+boxes.forEach(b=>{if(saved[b.id])b.checked=true});
+function update(){
+  const n=boxes.filter(b=>b.checked).length;
+  fill.style.width=(n/boxes.length*100)+'%';
+  txt.textContent=n===boxes.length?'Fertig!':n+' von '+boxes.length+' Schritten';
+  const st={};boxes.forEach(b=>{if(b.checked)st[b.id]=true});
+  try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}
+}
+boxes.forEach(b=>b.addEventListener('change',update));
+update();
+document.querySelectorAll('button[data-copy]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const el=document.getElementById(btn.dataset.copy);
+    const done=()=>{btn.textContent='Kopiert';setTimeout(()=>btn.textContent='Kopieren',1500)};
+    const fallback=()=>{const r=document.createRange();r.selectNodeContents(el);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);btn.textContent='Markiert'};
+    try{navigator.clipboard.writeText(el.textContent).then(done,fallback)}catch(e){fallback()}
+  });
+});
+})();
+</script>

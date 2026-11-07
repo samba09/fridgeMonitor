@@ -1,0 +1,5 @@
+# PlatformIO build output
+.pio/
+.vscode/
+# Built firmware is published as GitHub release asset
+firmware/
