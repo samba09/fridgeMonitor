@@ -1,0 +1,11 @@
+# Wokwi simulator (https://wokwi.com), VS Code extension or wokwi-cli.
+# Build the simulation variant first:  pio run -e esp32-sim
+[wokwi]
+version = 1
+firmware = '.pio/build/esp32-sim/firmware.bin'
+elf = '.pio/build/esp32-sim/firmware.elf'
+
+# Web page of the simulated ESP32: http://localhost:8180/
+[[net.forward]]
+from = "localhost:8180"
+to = "target:80"

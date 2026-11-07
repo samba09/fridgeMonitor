@@ -35,4 +35,6 @@ def merge_bin(source, target, env):
     print("Update-Image:   %s" % update)
 
 
-env.AddPostAction(APP_BIN, merge_bin)  # noqa: F821
+# Only the real firmware goes to firmware/, not the Wokwi simulation build.
+if env.subst("$PIOENV") == "esp32":  # noqa: F821
+    env.AddPostAction(APP_BIN, merge_bin)  # noqa: F821

@@ -172,6 +172,10 @@ void loadSettings() {
   apPass = prefs.getString("appass", AP_PASS_DEFAULT);
   if (apPass.length() < 8) apPass = AP_PASS_DEFAULT;
   apAuto = prefs.getBool("apauto", true);
+#ifdef WOKWI_SIM
+  staSsid = "Wokwi-GUEST";  // simulated network of the Wokwi simulator, no password
+  staPass = "";
+#endif
   for (int i = 0; i < NSLOTS; i++) {
     char key[4];
     snprintf(key, sizeof(key), "c%d", i);
@@ -480,11 +484,18 @@ void handleButton() {
 void startSta() {
   if (staSsid.length() == 0) return;
   Serial.printf("Verbinde mit WLAN \"%s\"\n", staSsid.c_str());
+#ifdef WOKWI_SIM
+  WiFi.begin(staSsid.c_str(), staPass.c_str(), 6);  // Wokwi-GUEST is on channel 6
+#else
   WiFi.begin(staSsid.c_str(), staPass.c_str());
+#endif
   staLastTryMs = millis();
 }
 
 void apStart() {
+#ifdef WOKWI_SIM
+  return;  // Wokwi cannot simulate the hotspot
+#endif
   if (apActive) return;
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(AP_SSID, apPass.c_str());
@@ -553,6 +564,9 @@ bool requestAllowed() {
   if (colon >= 0) host = host.substring(0, colon);
   host.toLowerCase();
   bool hostOk = host == WiFi.softAPIP().toString() || host == WiFi.localIP().toString() || host == HOSTNAME;
+#ifdef WOKWI_SIM
+  if (host == "localhost") hostOk = true;  // port forwarding of the simulator
+#endif
   // Names the home router may give the device, e.g. kuehlschrank.fritz.box
   static const char *suffixes[] = {".local", ".fritz.box", ".lan", ".home", ".home.arpa", ".box", ".speedport.ip"};
   for (const char *suf : suffixes)

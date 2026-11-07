@@ -55,6 +55,19 @@ Ergebnis:
 - `firmware/kuehlschrank-full.bin` – Komplett-Image zum ersten Flashen, Adresse `0x0`.
 - `firmware/kuehlschrank-update.bin` – nur die App, für das Web-Update.
 
+## Simulation (Wokwi)
+
+Die Firmware läuft im ESP32-Simulator [Wokwi](https://wokwi.com) mit beiden Fühlern und der Anzeige (`diagram.json`, `wokwi.toml`). Den Hotspot kann Wokwi nicht simulieren, deshalb verbindet sich die Simulations-Variante stattdessen mit dem simulierten WLAN `Wokwi-GUEST`.
+
+1. `pio run -e esp32-sim`
+2. VS Code mit der Erweiterung „Wokwi Simulator“ (kostenloser Account auf wokwi.com, dann F1 → „Wokwi: Request a new License“), Projekt öffnen, F1 → „Wokwi: Start Simulator“.
+3. Die Webseite ist unter http://localhost:8180/ erreichbar. Ein Klick auf einen Fühler im Schaltplan ändert seine Temperatur.
+
+Automatischer Test ohne Oberfläche mit [wokwi-cli](https://github.com/wokwi/wokwi-cli) und einem CI-Token von https://wokwi.com/dashboard/ci:
+```bash
+WOKWI_CLI_TOKEN=... wokwi-cli --scenario test/wokwi-smoke.yaml --timeout 90000 .
+```
+
 ## Pins
 | Funktion | GPIO | Aufdruck ELEGOO-Board |
 |---|---|---|

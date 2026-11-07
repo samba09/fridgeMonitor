@@ -57,6 +57,19 @@ Output:
 - `firmware/kuehlschrank-full.bin`: complete image for the first flash, address `0x0`.
 - `firmware/kuehlschrank-update.bin`: app only, for the web update.
 
+## Simulation (Wokwi)
+
+The firmware can run in the [Wokwi](https://wokwi.com) ESP32 simulator with both probes and the display (`diagram.json`, `wokwi.toml`). Wokwi cannot simulate the hotspot, so the simulation build joins the simulated network `Wokwi-GUEST` instead.
+
+1. `pio run -e esp32-sim`
+2. VS Code with the “Wokwi Simulator” extension (free account at wokwi.com, then F1 → “Wokwi: Request a new License”), open the project, F1 → “Wokwi: Start Simulator”.
+3. The web page is at http://localhost:8180/. Click a probe in the diagram to change its temperature.
+
+Headless smoke test with [wokwi-cli](https://github.com/wokwi/wokwi-cli) and a CI token from https://wokwi.com/dashboard/ci:
+```bash
+WOKWI_CLI_TOKEN=... wokwi-cli --scenario test/wokwi-smoke.yaml --timeout 90000 .
+```
+
 ## Pins
 | Function | GPIO | Label on the ELEGOO board |
 |---|---|---|

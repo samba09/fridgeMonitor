@@ -1,0 +1,12 @@
+# Smoke test for the Wokwi simulator (wokwi-cli):
+#   pio run -e esp32-sim
+#   WOKWI_CLI_TOKEN=$(cat ~/.wokwi-token) wokwi-cli --scenario test/wokwi-smoke.yaml --timeout 90000 .
+# Checks: firmware boots, both probes are found and assigned, the ESP32 joins
+# the simulated Wi-Fi.
+name: Kuehlschrank-Monitor smoke test
+version: 1
+steps:
+  - wait-serial: 'Kuehlschrank-Monitor'
+  - wait-serial: '-> Platz 1'
+  - wait-serial: '-> Platz 2'
+  - wait-serial: 'WLAN verbunden, IP'
