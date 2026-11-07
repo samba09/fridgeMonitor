@@ -7,7 +7,7 @@ Teile und Verkabelung: [partlist.md](partlist.md). **Bebilderte Bauanleitung:** 
 
 ## Was die Firmware macht
 
-- **Anzeige:** Die beiden Fühler werden im Wechsel alle 3 s angezeigt, in ganzen Grad (`  4°`, `-18°`). `----` bedeutet, dass der Fühler keine Werte liefert.
+- **Anzeige:** Die beiden Fühler werden im Wechsel alle 3 s angezeigt, in ganzen Grad (`-18°`, ` 12°`); von 0,0 bis 9,9 °C mit einer Nachkommastelle und `_` als Komma (`4_5°` = 4,5 °C), weil die Anzeige keine Dezimalpunkte hat. `----` bedeutet, dass der Fühler keine Werte liefert.
 - **Eigenes WLAN (Hotspot) zur Einrichtung:** Das Netz heißt **`Kuehlschrank`**, das Standard-Passwort ist **`kuehlschrank`** (auf der Webseite änderbar). Nach dem Verbinden öffnet sich die Seite meist von selbst, sonst im Browser **http://192.168.4.1** aufrufen.
 - **Webseite:** Aktuelle Temperaturen und ein 24-Stunden-Verlauf pro Fühler (1 Wert pro Minute) mit Min, Max und Durchschnitt. Außerdem Namen, Helligkeit, Fühler tauschen, WLAN und Firmware-Update.
 - **Heim-WLAN (optional):** Kann auf der Webseite eingetragen werden. Dann ist die Seite im Heimnetz erreichbar (`http://kuehlschrank.local` oder die IP, die die Anzeige zeigt), und die Uhrzeit kommt aus dem Internet. Ohne Internet übernimmt der ESP die Uhrzeit vom Handy, sobald die Seite geöffnet wird.

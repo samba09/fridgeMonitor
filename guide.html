@@ -182,10 +182,10 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   <h1>Fridge Monitor</h1>
   <p class="lede">Two probes measure the fridge and the freezer. A display on the outside shows both temperatures in turn. On your phone, via the monitor's own Wi-Fi, you can see the history of the last 24 hours.</p>
   <div class="heroDisplays">
-    <svg class="seg7" data-text="  4°" role="img" aria-label="Display: 4 degrees"></svg>
+    <svg class="seg7" data-text="4_5°" role="img" aria-label="Display: 4.5 degrees"></svg>
     <svg class="seg7" data-text="-18°" role="img" aria-label="Display: minus 18 degrees"></svg>
   </div>
-  <p class="muted" style="font-size:14px">This is what the display looks like. It has no real degree sign: the small square at the top right is made of the four upper segments of the last digit. The colon always stays off.</p>
+  <p class="muted" style="font-size:14px">This is what the display looks like. It has no real degree sign: the small square at the top right is made of the four upper segments of the last digit. It has no decimal point either, so from 0.0 to 9.9 °C it shows one decimal with an underscore as the decimal separator: <code>4_5°</code> means 4.5 °C. Everything else is shown in whole degrees. The colon always stays off.</p>
 </header>
 
 <div class="progress" aria-live="polite"><div class="bar"><i id="barfill"></i></div><span id="bartext">0 of 7 steps</span></div>
@@ -400,13 +400,13 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   <div class="stephead"><div class="num">6</div><div><h2>First start</h2><p class="muted">Here's what you'll see when everything is working.</p></div></div>
   <figure class="figure">
     <svg viewBox="0 0 700 190" role="img" aria-labelledby="f6t">
-      <title id="f6t">Display sequence at start-up: AP, 192, 168, 4, 1, then alternating 4 degrees and minus 18 degrees</title>
+      <title id="f6t">Display sequence at start-up: AP, 192, 168, 4, 1, then alternating 4.5 degrees and minus 18 degrees</title>
       <svg class="seg7" data-text="AP  " x="0" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text=" 192" x="110" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text=" 168" x="220" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text="   4" x="330" y="20" width="104" height="44"></svg>
       <svg class="seg7" data-text="   1" x="440" y="20" width="104" height="44"></svg>
-      <svg class="seg7" data-text="  4°" x="580" y="10" width="104" height="44"></svg>
+      <svg class="seg7" data-text="4_5°" x="580" y="10" width="104" height="44"></svg>
       <svg class="seg7" data-text="-18°" x="580" y="80" width="104" height="44"></svg>
       <path class="arrow" d="M548 42 h22"/><path class="arrowhead" d="M570 37 l7 5 l-7 5z"/>
       <path class="arrow" d="M690 34 C705 50 705 88 690 102"/><path class="arrowhead" d="M693 97 l-6 7 l9 1z"/>
@@ -452,7 +452,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
       <rect x="182" y="40" width="8" height="18" rx="2" fill="var(--muted)"/><rect x="182" y="372" width="8" height="18" rx="2" fill="var(--muted)"/>
       <text class="small" x="110" y="24">Hinge side</text>
       <rect x="112" y="64" width="64" height="30" rx="3" fill="var(--pcb)"/>
-      <svg class="seg7" data-text="  4°" x="116" y="68" width="56" height="22"></svg>
+      <svg class="seg7" data-text="4_5°" x="116" y="68" width="56" height="22"></svg>
       <rect x="128" y="98" width="32" height="44" rx="3" fill="var(--board)" stroke="var(--board-edge)"/>
       <text class="lbl" x="14" y="80">Display + ESP</text>
       <text class="small" x="14" y="96">outside, top of side</text>
@@ -586,7 +586,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
 (function(){
 /* ---------- 7-segment display (TM1637, 0.36", 4 digits, colon, no decimal points) ---------- */
 const MASK={'0':0x3f,'1':0x06,'2':0x5b,'3':0x4f,'4':0x66,'5':0x6d,'6':0x7d,'7':0x07,'8':0x7f,'9':0x6f,
-  '-':0x40,'°':0x63,'A':0x77,'P':0x73,' ':0};
+  '-':0x40,'°':0x63,'_':0x08,'A':0x77,'P':0x73,' ':0};
 const DW=34,DH=60,T=7,GAP=12,COLON=12,PADX=10,PADY=9,SKEW=-0.12;
 const VBW=PADX*2+8+DW*4+GAP*3+COLON+6, VBH=PADY*2+DH;
 function hseg(x,y,xa,xb){const h=T/2;return[[xa+1,y],[xa+1+h,y-h],[xb-1-h,y-h],[xb-1,y],[xb-1-h,y+h],[xa+1+h,y+h]].map(p=>[p[0]+x,p[1]])}

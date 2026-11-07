@@ -4,7 +4,8 @@
 // - Own WiFi hotspot "Kuehlschrank" with web page at http://192.168.4.1 (for setup,
 //   optionally off while the home WiFi works)
 // - Optional: joins the home WiFi (configured on the web page)
-// - Display alternates between the two probes (whole degrees)
+// - Display alternates between the two probes (whole degrees; 0.0 to 9.9 °C with one
+//   decimal, "_" as decimal separator because the display has no decimal points)
 // - History: 1 value per minute and probe, 24 h, kept in RAM
 // - Firmware update via web page
 //
@@ -29,7 +30,7 @@
 #include "tm1637.h"
 #include "webpage.h"
 
-static const char *FW_VERSION = "1.1.0";
+static const char *FW_VERSION = "1.2.0";
 
 // ---------------------------------------------------------------- config
 constexpr uint8_t PIN_ONEWIRE = 4;
@@ -341,10 +342,20 @@ void handleSensors() {
 }
 
 // ---------------------------------------------------------------- display
+// Whole degrees ("  4°" style, "-18°"), except 0.0 to 9.9 °C: one decimal with "_" as
+// decimal separator ("4_5°"), since the display has a colon but no decimal points.
 void formatTemp(float t, uint8_t out[4]) {
   for (int k = 0; k < 4; k++) out[k] = seg::BLANK;
   if (isnan(t)) {
     for (int k = 0; k < 4; k++) out[k] = seg::MINUS;
+    return;
+  }
+  long tenths = lroundf(t * 10.0f);
+  if (tenths >= 0 && tenths <= 99) {
+    out[0] = seg::DIGITS[tenths / 10];
+    out[1] = seg::UNDERSCORE;
+    out[2] = seg::DIGITS[tenths % 10];
+    out[3] = seg::DEGREE;
     return;
   }
   long v = lroundf(t);
