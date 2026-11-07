@@ -319,7 +319,7 @@ svg .shelf{stroke:var(--muted);stroke-width:2}
   <div class="note tip"><b class="lab">Warum kommt der Fühler-Strom aus RX2?</b>
     <p><b>RX2 ist nur ein Name.</b> Dahinter steckt der ganz normale Pin GPIO 16. Er heißt so, weil er auch als Empfangsleitung einer seriellen Schnittstelle dienen <i>kann</i>. Die Firmware nutzt ihn stattdessen als Ausgang und schaltet ihn auf „an“. Dann liegen dort 3,3 V an, genau wie am 3V3-Pin.</p>
     <p><b>Ein Ausgang als Stromquelle?</b> Ja, für kleine Ströme geht das. Ein Pin des ESP32 liefert gut 20 mA. Beide Fühler zusammen brauchen nur 2–3 mA. Für die Anzeige reicht es nicht, die zieht bis zu 80 mA und hängt deshalb am echten 3V3-Pin. Den gibt es nur einmal, und auf jeden Stift passt nur ein Kabel.</p>
-    <p><b>Bonus:</b> Weil der ESP den Fühler-Strom selbst schaltet, kann er hängende Fühler kurz aus- und wieder einschalten. Das passiert automatisch, wenn er dreimal hintereinander keinen Fühler findet.</p>
+    <p><b>Bonus:</b> Weil der ESP den Fühler-Strom selbst schaltet, kann er hängende Fühler kurz aus- und wieder einschalten. Das passiert automatisch, wenn er dreimal hintereinander keinen Fühler findet oder ein Fühler 3 Minuten lang keine gültigen Werte liefert.</p>
   </div>
   <div class="note warn"><b class="lab">Nicht verwechseln</b><p><span class="pin">RX0</span> und <span class="pin">TX0</span> (rechts, 3. und 4. Stift) gehören zur USB-Verbindung. Dort darf nichts angeschlossen werden.</p></div>
   <label class="done"><input type="checkbox" id="c2" data-step> Adapterplatine ist am ESP</label>
