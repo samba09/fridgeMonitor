@@ -66,7 +66,7 @@ td{padding:3px 0;vertical-align:top}td:first-child{color:var(--mut);width:45%}
 <details>
 <summary>WLAN</summary>
 <table id="wifi"></table>
-<p class="mut">Optional: zusätzlich mit dem Heim-WLAN verbinden. Dann ist die Seite auch über das Heimnetz erreichbar und die Uhrzeit kommt aus dem Internet. Der eigene Hotspot bleibt immer an.</p>
+<p class="mut">Optional: mit dem Heim-WLAN verbinden. Dann ist die Seite im Heimnetz erreichbar (die Anzeige zeigt die Adresse, oder http://kuehlschrank.local/) und die Uhrzeit kommt aus dem Internet.</p>
 <label for="ssid">Heim-WLAN</label>
 <select id="nets" onchange="if(this.value)ssid.value=this.value"><option value="">– Netz auswählen –</option></select>
 <input id="ssid" placeholder="Name (SSID)" style="margin-top:6px">
