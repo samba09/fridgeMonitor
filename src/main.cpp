@@ -6,7 +6,7 @@
 // - Optional: joins the home WiFi (configured on the web page)
 // - Display alternates between the two probes (whole degrees; 0.0 to 9.9 °C with one
 //   decimal, the lower-left segment as decimal comma: the display has no decimal points)
-// - History: 1 value per minute and probe, 24 h, kept in RAM
+// - History: 1 value per minute and probe, 7 days, kept in RAM
 // - Firmware update via web page
 //
 // Wiring (see partlist.md):
@@ -30,7 +30,7 @@
 #include "tm1637.h"
 #include "webpage.h"
 
-static const char *FW_VERSION = "1.2.0";
+static const char *FW_VERSION = "1.3.0";
 
 // ---------------------------------------------------------------- config
 constexpr uint8_t PIN_ONEWIRE = 4;
@@ -40,7 +40,7 @@ constexpr uint8_t PIN_TM_DIO = 23;
 constexpr uint8_t PIN_BOOT = 0;
 
 constexpr int NSLOTS = 2;
-constexpr int HIST_LEN = 24 * 60;  // 1 value per minute, 24 h
+constexpr int HIST_LEN = 7 * 24 * 60;  // 1 value per minute, 7 days (2 x 20 KB RAM)
 constexpr int16_t NODATA = INT16_MIN;
 
 constexpr uint32_t SAMPLE_INTERVAL_MS = 60UL * 1000;
@@ -86,6 +86,9 @@ Slot slots[NSLOTS];
 int16_t hist[NSLOTS][HIST_LEN];  // 0.1 °C, NODATA = no value
 uint16_t histHead = 0;           // next write position
 uint16_t histCount = 0;
+uint32_t histSeq = 0;            // values pushed since boot (sequence number of the next value)
+uint32_t histId = 0;             // changes on reboot and whenever stored values change (swap, forget,
+                                 // new probe): the web page then loads the whole history again
 uint32_t lastSampleMs = 0;
 
 uint8_t brightness = 4;
@@ -191,6 +194,7 @@ void loadSettings() {
 // ---------------------------------------------------------------- history
 void clearHistorySlot(int i) {
   for (int k = 0; k < HIST_LEN; k++) hist[i][k] = NODATA;
+  histId++;
 }
 
 void pushHistory() {
@@ -203,6 +207,7 @@ void pushHistory() {
   }
   histHead = (histHead + 1) % HIST_LEN;
   if (histCount < HIST_LEN) histCount++;
+  histSeq++;
 }
 
 // ---------------------------------------------------------------- sensors
@@ -649,26 +654,47 @@ void handleState() {
   sendJson(j);
 }
 
+// GET /api/history[?since=<seq>&id=<id>]
+// Without parameters, or if the page's copy is outdated: the whole history.
+// Otherwise only the values from sequence number <since> on (normally 1 or 2 per minute).
+// Response: seq = sequence number after the newest value, from = sequence number of the
+// first value in data, len = capacity in values.
 void handleHistory() {
+  uint32_t oldest = histSeq - histCount;
+  uint32_t from = oldest;
+  if (server.hasArg("since") && server.hasArg("id") &&
+      strtoul(server.arg("id").c_str(), nullptr, 10) == histId) {
+    uint32_t since = strtoul(server.arg("since").c_str(), nullptr, 10);
+    if (since >= oldest && since <= histSeq) from = since;
+  }
+  uint16_t n = histSeq - from;
   server.sendHeader("Cache-Control", "no-store");
   server.setContentLength(CONTENT_LENGTH_UNKNOWN);
   server.send(200, "application/json", "");
   String chunk;
-  chunk.reserve(1200);
-  chunk += "{\"interval\":60,\"age\":";
+  chunk.reserve(1500);
+  chunk += "{\"interval\":60,\"len\":";
+  chunk += HIST_LEN;
+  chunk += ",\"id\":";
+  chunk += histId;
+  chunk += ",\"seq\":";
+  chunk += histSeq;
+  chunk += ",\"from\":";
+  chunk += from;
+  chunk += ",\"age\":";
   chunk += (millis() - lastSampleMs) / 1000;
   chunk += ",\"epoch\":";
   chunk += timeValid() ? (uint32_t)time(nullptr) : 0;
   chunk += ",\"data\":[";
-  uint16_t start = (histHead + HIST_LEN - histCount) % HIST_LEN;
+  uint16_t start = (histHead + HIST_LEN - n) % HIST_LEN;
   for (int i = 0; i < NSLOTS; i++) {
     chunk += i ? ",[" : "[";
-    for (uint16_t k = 0; k < histCount; k++) {
+    for (uint16_t k = 0; k < n; k++) {
       if (k) chunk += ",";
       int16_t v = hist[i][(start + k) % HIST_LEN];
       if (v == NODATA) chunk += "null";
       else chunk += v;
-      if (chunk.length() > 1000) {
+      if (chunk.length() > 1400) {
         server.sendContent(chunk);
         chunk = "";
       }
@@ -740,6 +766,7 @@ void handleSwap() {
     hist[0][k] = hist[1][k];
     hist[1][k] = v;
   }
+  histId++;
   saveSlot(0);
   saveSlot(1);
   sendJson("{\"ok\":true}");
@@ -912,6 +939,7 @@ void setup() {
   const uint8_t dashes[4] = {seg::MINUS, seg::MINUS, seg::MINUS, seg::MINUS};
   display.show(dashes);
 
+  histId = esp_random();
   for (int i = 0; i < NSLOTS; i++) clearHistorySlot(i);
   loadSettings();
 

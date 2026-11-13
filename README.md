@@ -9,13 +9,19 @@ Parts and wiring: [partlist.md](partlist.md) (German). **Illustrated build guide
 
 - **Display:** shows the two probes alternately every 3 s, in whole degrees (`-18°`, ` 12°`); from 0.0 to 9.9 °C with one decimal (`4,5°`), using the lower-left segment as the decimal mark, because the display has no decimal points. `----` means the probe is not delivering readings.
 - **Own WiFi hotspot for setup:** network **`Kuehlschrank`**, default password **`kuehlschrank`** (change it on the web page). After joining, the page usually opens by itself; otherwise open **http://192.168.4.1** in a browser.
-- **Web page:** current temperatures and a 24-hour history per probe (one value per minute) with min, max and average. Also probe names, display brightness, swapping probes, WiFi and firmware update.
+- **Web page:** current temperatures and a 7-day history per probe (one value per minute) with min, max and average. The chart shows 24 hours and can be swiped left to older values. "Alles" shows the whole week at once (as a band from min to max with the average as a line), "⤓ CSV" downloads the history as a file for Excel. Also probe names, display brightness, swapping probes, WiFi and firmware update.
 - **Home WiFi (optional):** can be entered on the web page. The page is then reachable on the home network (`http://kuehlschrank.local` or the IP address shown on the display), and the clock is set from the internet. Without internet, the ESP takes the time from the phone as soon as the page is opened.
 - **Hotspot only for setup (default):** once the home WiFi has been connected for a minute and no phone is on the hotspot, the hotspot switches off. If the home WiFi is gone for more than 2 minutes, the hotspot comes back on by itself. Can be switched to “always on” on the web page.
 - **Probe assignment:** new probes are detected automatically. A probe below −5 °C is named “Gefrierfach” (freezer), otherwise “Kühlschrank” (fridge). Names can be changed on the web page.
 - **Short press on BOOT:** the display shows the IP address (`AP` = hotspot address, `IP` = address on the home WiFi).
 - **Factory reset:** hold BOOT for 10 s (the display counts down `rES7` … `rES1`), or use the button on the web page. Clears home WiFi, hotspot password, probe names and brightness.
 - **Limitation:** the history is kept in RAM only and is lost after a power cut.
+
+| Last 24 hours (swipe left for older values) | "Alles": the whole week, band from min to max |
+|---|---|
+| <img src="docs/webseite-24h.png" width="300" alt="Web page: current temperatures and 24-hour history of both probes"> | <img src="docs/webseite-woche.png" width="300" alt="Web page: week view as a band from min to max with an average line"> |
+
+*Screenshots with sample data. The spikes in the fridge are door openings, those in the freezer are defrost cycles.*
 
 The web page and the display texts are in German.
 

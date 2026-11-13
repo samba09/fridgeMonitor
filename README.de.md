@@ -9,13 +9,19 @@ Teile und Verkabelung: [partlist.md](partlist.md). **Bebilderte Bauanleitung:** 
 
 - **Anzeige:** Die beiden Fühler werden im Wechsel alle 3 s angezeigt, in ganzen Grad (`-18°`, ` 12°`); von 0,0 bis 9,9 °C mit einer Nachkommastelle (`4,5°`), das untere linke Segment dient als Komma, weil die Anzeige keine Dezimalpunkte hat. `----` bedeutet, dass der Fühler keine Werte liefert.
 - **Eigenes WLAN (Hotspot) zur Einrichtung:** Das Netz heißt **`Kuehlschrank`**, das Standard-Passwort ist **`kuehlschrank`** (auf der Webseite änderbar). Nach dem Verbinden öffnet sich die Seite meist von selbst, sonst im Browser **http://192.168.4.1** aufrufen.
-- **Webseite:** Aktuelle Temperaturen und ein 24-Stunden-Verlauf pro Fühler (1 Wert pro Minute) mit Min, Max und Durchschnitt. Außerdem Namen, Helligkeit, Fühler tauschen, WLAN und Firmware-Update.
+- **Webseite:** Aktuelle Temperaturen und ein Verlauf der letzten 7 Tage pro Fühler (1 Wert pro Minute) mit Min, Max und Durchschnitt. Das Diagramm zeigt 24 Stunden und lässt sich nach links zu älteren Werten wischen. „Alles“ zeigt die ganze Woche auf einmal (als Band von Min bis Max mit dem Durchschnitt als Linie), „⤓ CSV“ lädt den Verlauf als Datei für Excel herunter. Außerdem Namen, Helligkeit, Fühler tauschen, WLAN und Firmware-Update.
 - **Heim-WLAN (optional):** Kann auf der Webseite eingetragen werden. Dann ist die Seite im Heimnetz erreichbar (`http://kuehlschrank.local` oder die IP, die die Anzeige zeigt), und die Uhrzeit kommt aus dem Internet. Ohne Internet übernimmt der ESP die Uhrzeit vom Handy, sobald die Seite geöffnet wird.
 - **Hotspot nur zur Einrichtung (Standard):** Ist das Heim-WLAN seit einer Minute verbunden und kein Handy mehr im Hotspot, geht der Hotspot aus. Ist das Heim-WLAN länger als 2 Minuten weg, geht er von selbst wieder an. Auf der Webseite auf „immer an“ umstellbar.
 - **Fühler-Zuordnung:** Neue Fühler werden automatisch erkannt. Ein Fühler unter −5 °C heißt automatisch „Gefrierfach“, sonst „Kühlschrank“. Die Namen lassen sich auf der Webseite ändern.
 - **BOOT-Taste kurz drücken:** Die Anzeige zeigt die IP-Adresse (`AP` = Hotspot-Adresse, `IP` = Adresse im Heim-WLAN).
 - **Werksreset:** BOOT-Taste 10 s halten (die Anzeige zählt `rES7` … `rES1` herunter) oder Knopf auf der Webseite. Löscht Heim-WLAN, Hotspot-Passwort, Fühler-Namen und Helligkeit.
 - **Einschränkung:** Der Verlauf liegt nur im RAM und ist nach einem Stromausfall weg.
+
+| Letzte 24 Stunden (nach links wischen für ältere Werte) | „Alles“: die ganze Woche, Band von Min bis Max |
+|---|---|
+| <img src="docs/webseite-24h.png" width="300" alt="Webseite: aktuelle Temperaturen und 24-Stunden-Verlauf beider Fühler"> | <img src="docs/webseite-woche.png" width="300" alt="Webseite: Wochenansicht als Band von Min bis Max mit Durchschnittslinie"> |
+
+*Screenshots mit Beispieldaten. Die Spitzen im Kühlteil sind Türöffnungen, die im Gefrierfach Abtauphasen.*
 
 ## Flashen (einmalig per USB)
 
