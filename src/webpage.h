@@ -338,7 +338,11 @@ function downloadCsv(){
 function loadState(){return fetch('/api/state').then(r=>r.json()).then(s=>{state=s;render()}).catch(()=>{})}
 // Whole history once, then only the new values (the ESP sends everything again if its
 // history changed in between, e.g. after a restart or swapping probes).
-function loadHist(){
+// Requests run one after another: a second request sent before the first reply arrived
+// would carry the same "since" and its reply would no longer fit onto the page's copy.
+let histQueue=Promise.resolve();
+function loadHist(){return histQueue=histQueue.then(loadHistNow)}
+function loadHistNow(){
   const q=hist?`?since=${hist.seq}&id=${hist.id}`:'';
   return fetch('/api/history'+q).then(r=>r.json()).then(h=>{
     if(hist&&h.id===hist.id&&h.from===hist.seq){

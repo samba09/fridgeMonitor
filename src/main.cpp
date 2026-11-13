@@ -456,7 +456,9 @@ void handleDisplay() {
 // ---------------------------------------------------------------- BOOT button
 void factoryReset() {
   Serial.println("Werksreset");
+  uint32_t boots = prefs.getUInt("boots", 0);  // keep: history ids must not repeat
   prefs.clear();
+  prefs.putUInt("boots", boots);
   const uint8_t dashes[4] = {seg::MINUS, seg::MINUS, seg::MINUS, seg::MINUS};
   display.show(dashes);
   delay(500);
@@ -939,9 +941,13 @@ void setup() {
   const uint8_t dashes[4] = {seg::MINUS, seg::MINUS, seg::MINUS, seg::MINUS};
   display.show(dashes);
 
-  histId = esp_random();
   for (int i = 0; i < NSLOTS; i++) clearHistorySlot(i);
   loadSettings();
+  // History id unique per boot: boot counter in NVS (esp_random() is only pseudo-random
+  // before WiFi is on, so it could repeat). Leaves 2^20 changes per boot for swap/forget.
+  uint32_t boots = prefs.getUInt("boots", 0) + 1;
+  prefs.putUInt("boots", boots);
+  histId = boots << 20;
 
   delay(50);
   dallas.begin();
